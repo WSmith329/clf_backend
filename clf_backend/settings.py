@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'adminfilters',
     'constance',
     'django_jsonform',
+    'fontawesomefree',
     'phonenumber_field',
     'tailwind',
     'rangefilter',
