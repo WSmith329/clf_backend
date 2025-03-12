@@ -44,6 +44,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'admin_extra_buttons',
+    'adminfilters',
+    'constance',
+    'django_jsonform',
+    'phonenumber_field',
+    'rangefilter',
+
+    'client_management'
 ]
 
 MIDDLEWARE = [
@@ -132,7 +141,42 @@ STATIC_URL = '/static/'
 MEDIA_ROOT = env('MEDIA_ROOT')
 MEDIA_URL = '/media/'
 
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# Email
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = True
+EMAIL_PORT = env('EMAIL_PORT')
+EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+
+
+# Constance
+
+CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
+CONSTANCE_CONFIG = {
+    'STARTING_INVOICE_NUMBER': (100, 'Starting number for invoice codes of payments.')
+}
+
+
+# Google Sheets
+GOOGLE_SHEETS_CONFIG = {
+    'type': env('GOOGLE_SA_TYPE'),
+    'project_id': env('GOOGLE_SA_PROJECT_ID'),
+    'private_key_id': env('GOOGLE_SA_PRIVATE_KEY_ID'),
+    'private_key': env('GOOGLE_SA_PRIVATE_KEY').replace('\\n', '\n'),
+    'client_email': env('GOOGLE_SA_CLIENT_EMAIL'),
+    'client_id': env('GOOGLE_SA_CLIENT_ID'),
+    'auth_uri': env('GOOGLE_SA_AUTH_URI'),
+    'token_uri': env('GOOGLE_SA_TOKEN_URI'),
+    'auth_provider_x509_cert_url': env('GOOGLE_SA_AUTH_PROVIDER_X509_CERT_URL'),
+    'client_x509_cert_url': env('GOOGLE_SA_CLIENT_X509_CERT_URL'),
+    'universe_domain': env('GOOGLE_SA_UNIVERSE_DOMAIN')
+}
