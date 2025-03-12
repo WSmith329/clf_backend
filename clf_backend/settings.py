@@ -148,6 +148,9 @@ USE_TZ = True
 
 STATIC_ROOT = env('STATIC_ROOT')
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [
+    BASE_DIR / 'clf_backend' / 'static'
+]
 
 MEDIA_ROOT = env('MEDIA_ROOT')
 MEDIA_URL = 'media/'

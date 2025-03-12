@@ -1,11 +1,13 @@
 {% extends "base.html" %}
 
+{% load static %}
+
 {% block body %}
     <aside id="navigation-sidebar" class="h-screen w-screen lg:w-1/6 bg-primary absolute lg:static z-50 hidden lg:flex flex-col py-5 px-5 gap-y-5 font-sans text-white">
         <section class="relative h-16 flex flex-col justify-center items-center">
             <a href="{% url 'dashboard' %}" class="h-full">
                 <img class="h-full brightness-100 hover:brightness-0
-                duration-200 object-contain" src="/media/logo_white.png" alt="CLF Logo">
+                duration-200 object-contain" src="{% static 'logo_white.png' %}" alt="CLF Logo">
             </a>
             <button id="hide-navigation-bar-button" class="absolute right-0 top-0">
                 <i class="fa-solid fa-lg fa-xmark"></i>
