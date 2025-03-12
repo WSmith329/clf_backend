@@ -42,7 +42,16 @@ module.exports = {
         // '../../**/*.py'
     ],
     theme: {
-        extend: {},
+        extend: {
+            colors: {
+                primary: "#a98467",
+                secondary: "#d4e6b5",
+            },
+            fontFamily: {
+                sans: "var(--font-sans)",
+                serif: "var(--font-serif)",
+            }
+        }
     },
     plugins: [
         /**
