@@ -35,6 +35,10 @@ DEBUG = env('DEBUG')
 
 ALLOWED_HOSTS = ['*']
 
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -44,15 +48,19 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',
 
     'admin_extra_buttons',
     'adminfilters',
     'constance',
     'django_jsonform',
     'phonenumber_field',
+    'tailwind',
     'rangefilter',
+    'widget_tweaks',
 
-    'client_management'
+    'client_management',
+    'theme'
 ]
 
 MIDDLEWARE = [
@@ -70,7 +78,7 @@ ROOT_URLCONF = 'clf_backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -82,6 +90,8 @@ TEMPLATES = [
         },
     },
 ]
+
+TAILWIND_APP_NAME = 'theme'
 
 WSGI_APPLICATION = 'clf_backend.wsgi.application'
 
@@ -136,10 +146,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_ROOT = env('STATIC_ROOT')
-STATIC_URL = '/static/'
+STATIC_URL = 'static/'
 
 MEDIA_ROOT = env('MEDIA_ROOT')
-MEDIA_URL = '/media/'
+MEDIA_URL = 'media/'
 
 
 # Default primary key field type
