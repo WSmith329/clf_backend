@@ -181,6 +181,7 @@ CONSTANCE_CONFIG = {
 
 
 # Google Sheets
+
 GOOGLE_SHEETS_CONFIG = {
     'type': env('GOOGLE_SA_TYPE'),
     'project_id': env('GOOGLE_SA_PROJECT_ID'),
@@ -194,3 +195,10 @@ GOOGLE_SHEETS_CONFIG = {
     'client_x509_cert_url': env('GOOGLE_SA_CLIENT_X509_CERT_URL'),
     'universe_domain': env('GOOGLE_SA_UNIVERSE_DOMAIN')
 }
+
+
+# Login URLs
+
+LOGIN_URL = '/accounts/login'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
