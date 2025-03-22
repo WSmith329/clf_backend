@@ -48,7 +48,7 @@ class PaymentSheetGenerator:
         df['Paid'] = df.apply(lambda p: 'yes' if p['Date paid'] else 'no', axis=1)
         df['What for'] = df['What for'].apply(lambda p: ', '.join(map(str, p)))
         df = self._format_dates(df)
-        df = df.fillna(np.nan)
+        df = df.infer_objects(copy=False).fillna(np.nan)
         return df
 
     def generate(self, payments):

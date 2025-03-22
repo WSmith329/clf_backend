@@ -1,0 +1,43 @@
+{% extends "body.html" %}
+
+{% block content %}
+    <main class="w-full grow my-10 flex flex-col items-center">
+        <form method="post" class="font-sans w-full md:w-2/3 lg:w-1/3">
+            {% csrf_token %}
+            <div class="flex flex-col gap-y-5">
+                {{ message }}
+                {% for field in form %}
+                    <div>
+                        <label for="{{ field.id_for_label }}" class="uppercase font-semibold text-sm">
+                            {{ field.label }}
+                        </label>
+                        <div class="flex pt-1">
+                            <div class="inline-flex items-center px-3 text-sm text-neutral-500 bg-neutral-300
+                            dark:bg-neutral-800 border border-e-0 border-neutral-300 dark:border-neutral-700
+                            rounded-s-md">
+                                <i class="fa-solid fa-weight-scale"></i>
+                            </div>
+                            <input type="number" step="0.01"
+                                   id="{{ field.id_for_label }}" name="{{ field.html_name }}"
+                                   class="rounded-e-lg bg-neutral-200 dark:bg-black border border-neutral-300
+                                   dark:border-neutral-700 text-black dark:text-neutral-100 focus:ring-primary
+                                   ring-opacity-25 focus:border-primary focus:border-opacity-25 w-full text-sm p-2.5">
+                            <div class="text-red-600 text-sm">{{ field.errors }}</div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            {% for error in payment_form.non_field_errors %}
+                {{ error|escape }}
+            {% endfor %}
+
+            <div class="w-full text-center mt-10">
+                <button type="submit" class="w-full text-white bg-green-600 font-bold rounded-lg px-5 py-2.5 text-center
+                hover:bg-green-500 focus:ring focus:ring-green-600 focus:ring-opacity-25 duration-200">
+                    Save
+                </button>
+            </div>
+        </form>
+    </main>
+{% endblock content %}

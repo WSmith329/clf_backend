@@ -23,6 +23,17 @@ def user(db, django_user_model):
 
 
 @pytest.fixture
+def staff_user(db, django_user_model):
+    return django_user_model.objects.create_user(
+        username='staff',
+        password='staff_pass',
+        email='staff@testmail.com',
+        first_name='Staff',
+        is_staff=True
+    )
+
+
+@pytest.fixture
 def business_client(user):
     return Client.objects.create(
         user=user
@@ -50,4 +61,11 @@ def admin_user_client(admin_user):
 def client_user_client(client_user):
     client = Django_Client()
     client.force_login(client_user)
+    return client
+
+
+@pytest.fixture()
+def staff_user_client(staff_user):
+    client = Django_Client()
+    client.force_login(staff_user)
     return client

@@ -1,0 +1,163 @@
+{% extends "body.html" %}
+
+{% block content %}
+    <main class="w-full grow my-10 flex flex-col items-center">
+        <form method="post" class="font-sans w-full md:w-2/3 lg:w-1/3">
+            {% csrf_token %}
+            <div class="flex flex-col gap-y-5">
+                {% for field in payment_form %}
+                    <div>
+                        <label for="{{ field.id_for_label }}" class="uppercase font-semibold text-sm">
+                            {{ field.label }}
+                        </label>
+                        <div class="flex pt-1">
+                            {% if field.name == 'client' %}
+                                <select id="{{ field.id_for_label }}" name="{{ field.html_name }}"
+                                        class="rounded-lg bg-neutral-200 dark:bg-black border border-neutral-300
+                                    dark:border-neutral-700 text-black dark:text-neutral-100 focus:ring-primary
+                                    ring-opacity-25 focus:border-primary focus:border-opacity-25 text-sm w-full
+                                    py-2.5">
+                                    {% for value, label in field.field.choices %}
+                                        <option value="{{ value }}" {% if field.value == value %}selected{% endif %}>
+                                            {{ value.instance.user.first_name }} {{ value.instance.user.last_name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            {% else %}
+                                <input type="{{ field.widget_type }}" placeholder="{{ field.label }}"
+                                       id="{{ field.id_for_label }}" name="{{ field.html_name }}"
+                                       {% if field.name == "invoice_code" %}
+                                        value="{{ invoice_code }}"
+                                       {% elif field.value and field.name == "due_date" %}
+                                        value="{{ field.value|date:'Y-m-d' }}"
+                                       {% elif field.value %}
+                                        value="{{ field.value }}"
+                                       {% endif %}
+                                       class="rounded-lg bg-neutral-200 dark:bg-black border border-neutral-300
+                                   dark:border-neutral-700 text-black dark:text-neutral-100 focus:ring-primary
+                                   ring-opacity-25 focus:border-primary focus:border-opacity-25 w-full text-sm p-2.5">
+                            {% endif %}
+                        </div>
+                        <div class="text-red-600 text-sm">{{ field.errors }}</div>
+                    </div>
+                {% endfor %}
+
+                <div class="flex flex-col gap-y-3">
+                    {{ subscription_formset.management_form }}
+                    <div id="formset-container" class="flex flex-col gap-y-3">
+                        {% for form in subscription_formset %}
+                            <div class="formset-form flex gap-x-5 w-full">
+                                <div>
+                                    <label for="{{ form.service.id_for_label }}"
+                                           class="uppercase font-semibold text-sm">
+                                        {{ form.service.label }}
+                                    </label>
+                                    <select id="{{ form.service.id_for_label }}" name="{{ form.service.html_name }}"
+                                            class="rounded-lg bg-neutral-200 dark:bg-black border border-neutral-300
+                                        dark:border-neutral-700 text-black dark:text-neutral-100 focus:ring-primary
+                                        ring-opacity-25 focus:border-primary focus:border-opacity-25 text-sm
+                                        py-2.5">
+                                        {% for value, label in form.service.field.choices %}
+                                            <option value="{{ value }}"
+                                                    {% if form.service.value == value %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="{{ form.weeks.id_for_label }}" class="uppercase font-semibold text-sm">
+                                        {{ form.weeks.label }}
+                                    </label>
+                                    <input type="number" placeholder="{{ form.weeks.label }}" step="0.01"
+                                           id="{{ form.weeks.id_for_label }}" name="{{ form.weeks.html_name }}"
+                                            {% if form.weeks.value %}
+                                                value="{{ form.weeks.value }}"
+                                            {% endif %}
+                                           class="rounded-lg bg-neutral-200 dark:bg-black border border-neutral-300
+                                   dark:border-neutral-700 text-black dark:text-neutral-100 focus:ring-primary
+                                   ring-opacity-25 focus:border-primary focus:border-opacity-25 w-full text-sm p-2.5">
+                                </div>
+                                <div>
+                                    <label for="{{ form.sessions.id_for_label }}"
+                                           class="uppercase font-semibold text-sm">
+                                        {{ form.sessions.label }}
+                                    </label>
+                                    <input type="number" placeholder="{{ form.sessions.label }}"
+                                           id="{{ form.sessions.id_for_label }}" name="{{ form.sessions.html_name }}"
+                                            {% if form.sessions.value %}
+                                                value="{{ form.sessions.value }}"
+                                            {% endif %}
+                                           class="rounded-lg bg-neutral-200 dark:bg-black border border-neutral-300 dark:border-neutral-700
+                                    text-black dark:text-neutral-100
+                                    focus:ring-primary ring-opacity-25 focus:border-primary focus:border-opacity-25 w-full text-sm p-2.5">
+                                </div>
+                                <div>
+                                    <input type="hidden" id="{{ form.id.id_for_label }}"
+                                           name="{{ form.id.html_name }}" {% if form.id.value %} value="{{ form.id.value }}" {% endif %}>
+                                    <input type="hidden" id="{{ form.payment.id_for_label }}"
+                                           name="{{ form.payment.html_name }}" {% if form.payment.value %} value="{{ form.payment.value }}" {% endif %}>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="button" id="add-form" class="text-white text-sm bg-green-600 font-bold rounded-lg px-3
+                    py-1.5 text-center hover:bg-green-500 focus:ring focus:ring-green-600 focus:ring-opacity-25
+                    duration-200">Add Service
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {% for error in payment_form.non_field_errors %}
+                {{ error|escape }}
+            {% endfor %}
+
+            <div class="w-full text-center mt-10">
+                <button type="submit" class="w-full text-white bg-green-600 font-bold rounded-lg px-5 py-2.5 text-center
+                hover:bg-green-500 focus:ring focus:ring-green-600 focus:ring-opacity-25 duration-200">
+                    Create Request
+                </button>
+            </div>
+        </form>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const formsetContainer = document.querySelector('#formset-container');
+            const addButton = document.querySelector('#add-form');
+
+            let totalForms = document.querySelector('#id_subscription_set-TOTAL_FORMS');
+            let formsetForm = document.querySelectorAll('.formset-form');
+
+            let formNum = formsetForm.length - 1;
+
+            addButton.addEventListener('click', (e) => {
+                e.preventDefault()
+
+                const newForm = formsetForm[0].cloneNode(true);
+                const formRegex = RegExp(`set-(\d+)-`, 'g');
+
+                formNum++
+                newForm.innerHTML = newForm.innerHTML.replace(formRegex, `set-${formNum}-`);
+
+                newForm.querySelectorAll('input, select, textarea').forEach(input => {
+                    if (input.name) {
+                        input.name = input.name.replace(formRegex, `set-${formNum}-`);
+                    }
+                    if (input.id) {
+                        input.id = input.id.replace(formRegex, `set-${formNum}-`);
+                    }
+                    if (input.type === 'checkbox' || input.type === 'radio') {
+                        input.checked = false;
+                    } else {
+                        input.value = ''; // Clear input values
+                    }
+                });
+
+                formsetContainer.appendChild(newForm);
+
+                totalForms.setAttribute('value', `${formNum + 1}`);
+            });
+        });
+    </script>
+{% endblock content %}

@@ -10,6 +10,8 @@ from django.utils.translation import gettext_lazy as _
 from django_jsonform.models.fields import JSONField
 from phonenumber_field.modelfields import PhoneNumberField
 
+from client_management.utils import get_choice_from_label
+
 logger = logging.getLogger(__name__)
 
 
@@ -21,6 +23,7 @@ class Client(models.Model):
         MALE = 'MR', _('Male')
         FEMALE = 'MS', _('Female')
         INTERSEX = 'MX', _('Intersex')
+
     sex = models.CharField(
         choices=Sexes,
         default=Sexes.UNSPECIFIED,
@@ -124,12 +127,12 @@ class Payment(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.invoice_code:
-            self.invoice_code = self._generate_invoice_code()
+            self.invoice_code = self.generate_invoice_code()
 
         super().save(*args, **kwargs)
 
     @staticmethod
-    def _generate_invoice_code():
+    def generate_invoice_code():
         """Generate invoice code automatically."""
         prev_payment = Payment.objects.annotate(
             invoice_number=Cast(Substr('invoice_code', 4, 5), IntegerField())
@@ -202,6 +205,30 @@ class Payment(models.Model):
     @property
     def is_void(self):
         return self.status == self.PaymentStatuses.VOID
+
+    @staticmethod
+    def _transform_status_label_to_url_format(label):
+        return str(label).lower()
+
+    @classmethod
+    def draft_status_in_url_format(cls):
+        return cls._transform_status_label_to_url_format(Payment.PaymentStatuses.DRAFT.label)
+
+    @classmethod
+    def requested_status_in_url_format(cls):
+        return cls._transform_status_label_to_url_format(Payment.PaymentStatuses.REQUESTED.label)
+
+    @classmethod
+    def completed_status_in_url_format(cls):
+        return cls._transform_status_label_to_url_format(Payment.PaymentStatuses.COMPLETED.label)
+
+    @classmethod
+    def void_status_in_url_format(cls):
+        return cls._transform_status_label_to_url_format(Payment.PaymentStatuses.VOID.label)
+
+    @classmethod
+    def get_payment_status_from_label(cls, label: str):
+        return get_choice_from_label(cls.PaymentStatuses, label)
 
 
 class Subscription(models.Model):

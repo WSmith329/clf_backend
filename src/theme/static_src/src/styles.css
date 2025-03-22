@@ -8,3 +8,8 @@
   --font-sans: "Monsterrat", sans-serif;
   --font-serif: "Cormorant", serif;
 }
+
+.fade-out {
+    opacity: 0;
+    transition: opacity 0.5s ease-out;
+}

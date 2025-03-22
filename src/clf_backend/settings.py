@@ -176,7 +176,7 @@ EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
 
 CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
 CONSTANCE_CONFIG = {
-    'STARTING_INVOICE_NUMBER': (100, 'Starting number for invoice codes of payments.')
+    'STARTING_INVOICE_NUMBER': (1, 'Starting number for invoice codes of payments.')
 }
 
 

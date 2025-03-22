@@ -1,7 +1,8 @@
-from django.forms import ModelForm, DateField, forms, widgets, BooleanField
+from django.forms import ModelForm, DateField, forms, widgets, BooleanField, inlineformset_factory, IntegerField, \
+    DateInput
 from django.utils import timezone
 
-from client_management.models import MeasurementRecording
+from client_management.models import MeasurementRecording, Payment, Subscription
 
 
 class MeasurementRecordingForm(ModelForm):
@@ -32,3 +33,22 @@ class CompletedDateForm(forms.Form):
         required=False,
         help_text='This only applies if the amount paid does not match the amount due.'
     )
+
+
+class PaymentRequestForm(ModelForm):
+    class Meta:
+        model = Payment
+        fields = ['invoice_code', 'client', 'amount_due', 'due_date', 'notes']
+
+
+SubscriptionFormSet = inlineformset_factory(
+    Payment,
+    Subscription,
+    fields=('service', 'weeks', 'sessions'),
+    extra=1,
+    can_delete=True
+)
+
+
+class StartingInvoiceNumberForm(forms.Form):
+    starting_invoice_number = IntegerField(required=False, min_value=0, help_text='Leave blank to accept default.')

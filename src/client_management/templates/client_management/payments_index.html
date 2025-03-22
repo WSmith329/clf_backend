@@ -1,0 +1,151 @@
+{% extends "body.html" %}
+
+{% block content %}
+    <main class="w-full grow my-10 flex flex-col items-center">
+        <div class="hidden bg-green-600 bg-red-600 bg-neutral-600 hover:bg-green-500 hover:bg-red-500 hover:bg-neutral-500"></div>
+        <nav class="w-full flex flex-col md:flex-row gap-y-4 relative justify-center mb-5 md:mb-10">
+            <div class="bg-neutral-200 rounded-full text-sm md:text-lg overflow-hidden border-4 border-neutral-200">
+                {% for status in payment_statuses %}
+                    <a href="{% url 'payments_index' status.label|lower %}" class="px-5 py-1 font-semibold hover:bg-white
+                    hover:bg-opacity-65 duration-200 hover:text-primary
+                    {% if status == chosen_status %}bg-primary text-white{% endif %}">
+                        {{ status.label }}
+                    </a>
+                {% endfor %}
+            </div>
+            <div class="md:absolute md:left-full md:-translate-x-full md:top-1/2 md:-translate-y-1/2 text-nowrap
+            font-sans text-xs md:text-sm flex justify-end">
+                <a href="{% url 'create_payment_request' %}"
+                   class="bg-green-600 text-white rounded-full hover:bg-green-500 duration-200 px-3 py-2
+                   cursor-pointer flex items-center gap-x-2 w-fit">
+                    <i class="fa-solid fa-circle-plus"></i>Create Payment Request
+                </a>
+            </div>
+        </nav>
+
+        {% include 'components/messages.html' %}
+
+        <div class="font-sans w-full md:w-2/3">
+            <form id="paymentForm" method="POST" action="{% url 'process_selected_payments' %}">
+                {% csrf_token %}
+                {% if group_actions %}
+                    <div class="flex justify-start mb-5 md:mb-10 gap-x-4">
+                        <label>
+                            <select name="action" required class="rounded-lg bg-neutral-200 dark:bg-black border border-neutral-300
+                                                dark:border-neutral-700 text-black dark:text-neutral-100 focus:ring-primary
+                                                ring-opacity-25 focus:border-primary focus:border-opacity-25 text-xs md:text-sm
+                                                py-2.5">
+                                <option value="" disabled selected>Select Action</option>
+                                {% for value, label in group_actions %}
+                                    <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </label>
+                        <button type="submit" class="text-white bg-primary rounded-lg px-2.5 font-semibold text-center
+                        text-xs md:text-sm hover:brightness-105 focus:ring focus:ring-primary focus:ring-opacity-25 duration-200">
+                            Submit
+                        </button>
+                    </div>
+                {% endif %}
+                <div class="grid {% if actions and group_actions %} grid-cols-11 {% elif actions %} grid-cols-10
+                    {% elif group_actions %} grid-cols-9 {% else %} grid-cols-8 {% endif %}">
+                    {% if group_actions %}
+                        <div class="col-span-1 row-span-1 uppercase font-semibold text-xs md:text-sm text-center flex justify-center pb-2">
+                        </div>
+                    {% endif %}
+                    <div class="col-span-2 row-span-1 uppercase font-semibold text-xs md:text-sm text-center flex justify-center pb-2">
+                        Invoice Code
+                    </div>
+                    <div class="col-span-2 row-span-1 uppercase font-semibold text-xs md:text-sm text-center flex justify-center pb-2">
+                        Client
+                    </div>
+                    <div class="col-span-2 row-span-1 uppercase font-semibold text-xs md:text-sm text-center flex justify-center pb-2">
+                        Amount Due
+                    </div>
+                    <div class="col-span-2 row-span-1 uppercase font-semibold text-xs md:text-sm text-center flex justify-center pb-2">
+                        Date Due
+                    </div>
+                    {% if actions %}
+                    <div class="col-span-2 row-span-1 uppercase font-semibold text-xs md:text-sm text-center flex justify-center pb-2">
+                        Actions
+                    </div>
+                    {% endif %}
+                    {% for payment in page %}
+                        {% if group_actions %}
+                            <div class="col-span-1 row-span-1 flex justify-center items-center py-3">
+                                <label>
+                                    <input type="checkbox" name="selected_payments" value="{{ payment.pk }}"
+                                           class="rounded-md bg-neutral-200 dark:bg-black border border-neutral-300
+                                                dark:border-neutral-700 dark:text-neutral-100 focus:ring-primary
+                                                text-primary ring-opacity-25 focus:border-primary focus:border-opacity-25">
+                                </label>
+                            </div>
+                        {% endif %}
+                        <div class="col-span-2 row-span-1 flex justify-center items-center py-3 text-xs md:text-base
+                        text-center {% cycle 'bg-neutral-100' 'bg-white' %}">
+                            {{ payment.invoice_code }}
+                        </div>
+                        <div class="col-span-2 row-span-1 flex justify-center items-center py-3 text-xs md:text-base
+                        text-center {% cycle 'bg-neutral-100' 'bg-white' %}">
+                            {{ payment.client.user.first_name }}  {{ payment.client.user.last_name }}
+                        </div>
+                        <div class="col-span-2 row-span-1 flex justify-center items-center py-3 text-xs md:text-base
+                        text-center {% cycle 'bg-neutral-100' 'bg-white' %}">
+                            £{{ payment.amount_due }}
+                        </div>
+                        <div class="col-span-2 row-span-1 flex justify-center items-center py-3 text-xs md:text-base
+                        text-center {% cycle 'bg-neutral-100' 'bg-white' %} {% now "Y-m-d" as today %}
+                        {% if payment.status == payment.PaymentStatuses.REQUESTED and payment.due_date|date:"Y-m-d" > today %} font-semibold text-red-600 {% endif %}">
+                            {{ payment.due_date }}
+                        </div>
+                        {% if actions %}
+                            <div class="col-span-2 row-span-1 flex flex-col md:flex-row justify-center items-center py-6
+                            text-center gap-x-1 gap-y-1 {% cycle 'bg-neutral-100' 'bg-white' %}">
+                                {% for label, url, colour in actions %}
+                                    <a href="{{ url }}{{ payment.pk }}/"
+                                       class="text-xs md:text-sm bg-{{ colour }}-600 text-white px-2 py-1 rounded-full
+                                       hover:bg-{{ colour }}-500 duration-200">
+                                        {{ label }}
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% empty %}
+                        <div class="col-span-11 row-span-1 flex justify-center items-center py-3">
+                            No payment records to show.
+                        </div>
+                    {% endfor %}
+                </div>
+            </form>
+        </div>
+        <div class="flex justify-between items-center font-sans gap-x-4">
+            {% if page.has_previous %}
+                <a href="?page={{ page.previous_page_number }}" class="text-white bg-primary rounded-lg px-2.5 py-2.5
+                text-center text-xs md:text-sm hover:brightness-105 focus:ring focus:ring-primary
+                focus:ring-opacity-25 duration-200">
+                    <i class="fa-solid fa-chevron-left"></i> Prev
+                </a>
+            {% else %}
+                <div class="text-neutral-100 bg-neutral-400 rounded-lg px-2.5 py-2.5 text-center text-xs md:text-sm">
+                    <i class="fa-solid fa-chevron-left"></i> Prev
+                </div>
+            {% endif %}
+
+            <span>
+                Page {{ page.number }} of {{ page.paginator.num_pages }}
+            </span>
+
+            {% if page.has_next %}
+                <a href="?page={{ page.next_page_number }}" class="text-white bg-primary rounded-lg px-2.5 py-2.5
+                text-center text-xs md:text-sm hover:brightness-105 focus:ring focus:ring-primary
+                focus:ring-opacity-25 duration-200">
+                    Next <i class="fa-solid fa-chevron-right"></i>
+                </a>
+            {% else %}
+                <div class="text-neutral-100 bg-neutral-400 rounded-lg px-2.5 py-2.5 text-center text-xs md:text-sm">
+                    Next <i class="fa-solid fa-chevron-right"></i>
+                </div>
+            {% endif %}
+        </div>
+    </main>
+{% endblock content %}

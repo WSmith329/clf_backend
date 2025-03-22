@@ -1,7 +1,7 @@
 import pytest
 from constance.test import override_config
 
-from config.factories.client_management import PaymentFactory
+from config.factories.client_management import PaymentFactory, ServiceFactory
 
 
 @pytest.fixture
@@ -17,3 +17,8 @@ def requested_payment(payment):
     payment.amount_due = 120
     payment.set_as_requested()
     return payment
+
+
+@pytest.fixture
+def service(db):
+    return ServiceFactory()
