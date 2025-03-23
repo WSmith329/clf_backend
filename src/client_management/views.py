@@ -113,6 +113,8 @@ def set_starting_invoice_number(request):
             if starting_invoice_number := form.cleaned_data['starting_invoice_number']:
                 config.STARTING_INVOICE_NUMBER = starting_invoice_number
             request.session['skip_set_starting_invoice_number'] = True
+            messages.success(request, 'Starting invoice number set.'
+                                      f'The first invoice code will be {Payment.generate_invoice_code()}.')
             return redirect(
                 'payments_index',
                 Payment.draft_status_in_url_format()
@@ -137,6 +139,7 @@ def send_payment_request(request, pk):
     payment = Payment.objects.get(pk=pk)
     payment.request()
 
+    messages.success(request, f'Sent request for {payment.invoice_code} to {payment.client.user.email}.')
     return redirect('payments_index', Payment.requested_status_in_url_format())
 
 
@@ -144,6 +147,7 @@ def mark_payment_as_completed(request, pk):
     payment = Payment.objects.get(pk=pk)
     payment.set_as_completed()
 
+    messages.success(request, f'Marked {payment.invoice_code} as completed.')
     return redirect('payments_index', Payment.completed_status_in_url_format())
 
 
@@ -151,6 +155,7 @@ def mark_payment_as_void(request, pk):
     payment = Payment.objects.get(pk=pk)
     payment.set_as_void()
 
+    messages.success(request, f'Marked {payment.invoice_code} as void.')
     return redirect('payments_index', Payment.void_status_in_url_format())
 
 
@@ -168,17 +173,17 @@ def process_selected_payments(request):
                 for pk in selected_payments:
                     payment = Payment.objects.get(pk=pk)
                     payment.request()
-                messages.success(request, f"Sent requests for {len(selected_payments)} payments.")
+                messages.success(request, f'Sent requests for {len(selected_payments)} payments.')
                 return redirect('payments_index', Payment.requested_status_in_url_format())
 
             case 'complete_payments':
                 Payment.objects.filter(pk__in=selected_payments).update(status=Payment.PaymentStatuses.COMPLETED.value)
-                messages.success(request, f"Marked {len(selected_payments)} payments as completed.")
+                messages.success(request, f'Marked {len(selected_payments)} payments as completed.')
                 return redirect('payments_index', Payment.completed_status_in_url_format())
 
             case 'void_payments':
                 Payment.objects.filter(pk__in=selected_payments).update(status=Payment.PaymentStatuses.VOID.value)
-                messages.success(request, f"Marked {len(selected_payments)} payments as void.")
+                messages.success(request, f'Marked {len(selected_payments)} payments as void.')
                 return redirect('payments_index', Payment.void_status_in_url_format())
 
     return redirect('payments_index', Payment.draft_status_in_url_format())
