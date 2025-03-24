@@ -71,7 +71,8 @@ def payments_index(request, payment_status):
         'payments': payments,
         'actions': actions[payment_status],
         'group_actions': group_actions[payment_status],
-        'page': page
+        'page': page,
+        'today': datetime.date.today()
     })
 
 

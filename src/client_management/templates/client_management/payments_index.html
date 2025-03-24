@@ -94,8 +94,8 @@
                             £{{ payment.amount_due }}
                         </div>
                         <div class="col-span-2 row-span-1 flex justify-center items-center py-3 text-xs md:text-base
-                        text-center {% cycle 'bg-neutral-100' 'bg-white' %} {% now "Y-m-d" as today %}
-                        {% if payment.status == payment.PaymentStatuses.REQUESTED and payment.due_date|date:"Y-m-d" > today %} font-semibold text-red-600 {% endif %}">
+                        text-center {% cycle 'bg-neutral-100' 'bg-white' %}
+                        {% if payment.status == payment.PaymentStatuses.REQUESTED and payment.due_date < today %} font-semibold text-red-600 {% endif %}">
                             {{ payment.due_date }}
                         </div>
                         {% if actions %}
