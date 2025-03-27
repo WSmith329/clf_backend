@@ -1,7 +1,7 @@
 {% if messages %}
-    <div id="message-container" class="fixed top-24 flex flex-col gap-y-10 justify-center z-50">
+    <div id="message-container" class="fixed bottom-24 right-8 flex flex-col gap-y-10 items-center z-50">
         {% for message in messages %}
-            <div class="message px-4 py-2 rounded-lg mb-2 flex gap-x-10 opacity-100 transition-opacity duration-500
+            <div class="message px-4 py-2 rounded-lg mb-2 flex gap-x-10 opacity-80 hover:opacity-100 w-fit
                         {% if message.tags == 'success' %}bg-green-100 text-green-800 border border-green-400{% endif %}
                         {% if message.tags == 'error' %}bg-red-100 text-red-800 border border-red-400{% endif %}
                         {% if message.tags == 'warning' %}bg-yellow-100 text-yellow-800 border border-yellow-400{% endif %}
@@ -17,16 +17,14 @@
     <script>
         function removeMessage(element) {
             const messageDiv = element.parentElement;
-            messageDiv.classList.add("fade-out"); // Apply fade-out effect
-            setTimeout(() => messageDiv.remove(), 500);
+            setTimeout(() => messageDiv.remove());
         }
 
         // Automatically remove messages after 3 seconds
         setTimeout(() => {
             document.querySelectorAll(".message").forEach((messageDiv) => {
-                messageDiv.classList.add("fade-out");
-                setTimeout(() => messageDiv.remove(), 500);
+                setTimeout(() => messageDiv.remove());
             });
-        }, 3000);
+        }, 20000);
     </script>
 {% endif %}

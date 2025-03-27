@@ -1,0 +1,64 @@
+{% extends "fitness/manage_activities.html" %}
+{% block activities_table %}
+    <form method="POST" action="{% url 'manage_exercises' %}">
+        {% csrf_token %}
+        <div class="flex justify-start mb-5 md:mb-10 gap-x-4">
+            <label>
+                <input type="text" name="exercise_name" class="form-input" placeholder="Exercise Name"
+                {% if searched_exercise %}value="{{ searched_exercise }}"{% endif %}>
+            </label>
+            <div class="flex gap-x-2">
+                <button type="submit" class="form-button-primary form-button-small">
+                    Search
+                </button>
+                <a href="{% url 'manage_exercises' %}"
+                   class="form-button-neutral form-button-small flex items-center">Reset</a>
+            </div>
+        </div>
+    </form>
+    <div class="grid grid-cols-12">
+        <div class="col-span-3 row-span-1 uppercase font-semibold text-xs md:text-sm text-center flex justify-center pb-2">
+            Name
+        </div>
+        <div class="col-span-6 row-span-1 uppercase font-semibold text-xs md:text-sm text-center flex justify-center pb-2">
+            Categories
+        </div>
+        <div class="col-span-3 row-span-1 uppercase font-semibold text-xs md:text-sm text-center flex justify-center pb-2">
+            Actions
+        </div>
+        {% for exercise in exercises %}
+            <div class="col-span-3 row-span-1 flex justify-center items-center py-3 text-xs md:text-base
+            text-center {% cycle 'bg-neutral-100' 'bg-white' %}">
+                {{ exercise.name }}
+            </div>
+            <div class="col-span-6 row-span-1 flex justify-center items-center py-3 text-xs md:text-base
+            text-center {% cycle 'bg-neutral-100' 'bg-white' %}">
+                {% for category in exercise.categories.all %}
+                    {{ category.name }}{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            </div>
+            <div class="col-span-3 row-span-1 flex flex-col md:flex-row justify-center items-center py-6
+            text-center gap-x-1 gap-y-1 {% cycle 'bg-neutral-100' 'bg-white' %}">
+                <a href="{% url 'update_exercise' exercise.id %}"
+                   class="text-xs md:text-sm bg-neutral-600 text-white px-2 py-1 rounded-full
+                   hover:bg-neutral-500 duration-200">
+                    Edit
+                </a>
+                <a href="{% url 'delete_exercise' exercise.id %}"
+                   class="text-xs md:text-sm bg-red-600 text-white px-2 py-1 rounded-full
+                   hover:bg-red-500 duration-200">
+                    Delete
+                </a>
+                <a href="{% url 'create_exercise' %}?copy_from={{ exercise.id }}"
+                   class="text-xs md:text-sm bg-green-600 text-white px-2 py-1 rounded-full
+                   hover:bg-green-500 duration-200">
+                    Copy
+                </a>
+            </div>
+        {% empty %}
+            <div class="col-span-11 row-span-1 flex justify-center items-center py-3">
+                No exercises to show.
+            </div>
+        {% endfor %}
+    </div>
+{% endblock activities_table %}

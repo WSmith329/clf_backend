@@ -4,19 +4,16 @@
     <main class="w-full grow my-10 flex flex-col items-center">
         <form method="post" class="font-sans w-full md:w-2/3 lg:w-1/3">
             {% csrf_token %}
-            <div class="flex flex-col gap-y-5">
+            <div class="form-group">
                 {% for field in payment_form %}
                     <div>
-                        <label for="{{ field.id_for_label }}" class="uppercase font-semibold text-sm">
+                        <label for="{{ field.id_for_label }}" class="form-label">
                             {{ field.label }}
                         </label>
-                        <div class="flex pt-1">
+                        <div class="form-field">
                             {% if field.name == 'client' %}
                                 <select id="{{ field.id_for_label }}" name="{{ field.html_name }}"
-                                        class="rounded-lg bg-neutral-200 dark:bg-black border border-neutral-300
-                                    dark:border-neutral-700 text-black dark:text-neutral-100 focus:ring-primary
-                                    ring-opacity-25 focus:border-primary focus:border-opacity-25 text-sm w-full
-                                    py-2.5">
+                                        class="form-select">
                                     {% for value, label in field.field.choices %}
                                         <option value="{{ value }}" {% if field.value == value %}selected{% endif %}>
                                             {{ value.instance.user.first_name }} {{ value.instance.user.last_name }}
@@ -33,30 +30,25 @@
                                        {% elif field.value %}
                                         value="{{ field.value }}"
                                        {% endif %}
-                                       class="rounded-lg bg-neutral-200 dark:bg-black border border-neutral-300
-                                   dark:border-neutral-700 text-black dark:text-neutral-100 focus:ring-primary
-                                   ring-opacity-25 focus:border-primary focus:border-opacity-25 w-full text-sm p-2.5">
+                                       class="form-input">
                             {% endif %}
                         </div>
-                        <div class="text-red-600 text-sm">{{ field.errors }}</div>
+                        <div class="form-error">{{ field.errors }}</div>
                     </div>
                 {% endfor %}
 
-                <div class="flex flex-col gap-y-3">
+                <div class="formset-group">
                     {{ subscription_formset.management_form }}
-                    <div id="formset-container" class="flex flex-col gap-y-3">
+                    <div id="formset-container" class="formset-group">
                         {% for form in subscription_formset %}
-                            <div class="formset-form flex gap-x-5 w-full">
+                            <div class="formset-form">
                                 <div>
                                     <label for="{{ form.service.id_for_label }}"
-                                           class="uppercase font-semibold text-sm">
+                                           class="form-label">
                                         {{ form.service.label }}
                                     </label>
                                     <select id="{{ form.service.id_for_label }}" name="{{ form.service.html_name }}"
-                                            class="rounded-lg bg-neutral-200 dark:bg-black border border-neutral-300
-                                        dark:border-neutral-700 text-black dark:text-neutral-100 focus:ring-primary
-                                        ring-opacity-25 focus:border-primary focus:border-opacity-25 text-sm
-                                        py-2.5">
+                                            class="form-select">
                                         {% for value, label in form.service.field.choices %}
                                             <option value="{{ value }}"
                                                     {% if form.service.value == value %}selected{% endif %}>{{ label }}</option>
@@ -64,7 +56,7 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <label for="{{ form.weeks.id_for_label }}" class="uppercase font-semibold text-sm">
+                                    <label for="{{ form.weeks.id_for_label }}" class="form-label">
                                         {{ form.weeks.label }}
                                     </label>
                                     <input type="number" placeholder="{{ form.weeks.label }}" step="0.01"
@@ -72,13 +64,11 @@
                                             {% if form.weeks.value %}
                                                 value="{{ form.weeks.value }}"
                                             {% endif %}
-                                           class="rounded-lg bg-neutral-200 dark:bg-black border border-neutral-300
-                                   dark:border-neutral-700 text-black dark:text-neutral-100 focus:ring-primary
-                                   ring-opacity-25 focus:border-primary focus:border-opacity-25 w-full text-sm p-2.5">
+                                           class="form-input">
                                 </div>
                                 <div>
                                     <label for="{{ form.sessions.id_for_label }}"
-                                           class="uppercase font-semibold text-sm">
+                                           class="form-label">
                                         {{ form.sessions.label }}
                                     </label>
                                     <input type="number" placeholder="{{ form.sessions.label }}"
@@ -86,9 +76,7 @@
                                             {% if form.sessions.value %}
                                                 value="{{ form.sessions.value }}"
                                             {% endif %}
-                                           class="rounded-lg bg-neutral-200 dark:bg-black border border-neutral-300 dark:border-neutral-700
-                                    text-black dark:text-neutral-100
-                                    focus:ring-primary ring-opacity-25 focus:border-primary focus:border-opacity-25 w-full text-sm p-2.5">
+                                           class="form-input">
                                 </div>
                                 <div>
                                     <input type="hidden" id="{{ form.id.id_for_label }}"
@@ -99,10 +87,8 @@
                             </div>
                         {% endfor %}
                     </div>
-                    <div class="flex justify-end">
-                        <button type="button" id="add-form" class="text-white text-sm bg-green-600 font-bold rounded-lg px-3
-                    py-1.5 text-center hover:bg-green-500 focus:ring focus:ring-green-600 focus:ring-opacity-25
-                    duration-200">Add Service
+                    <div class="formset-button-container">
+                        <button type="button" id="add-form" class="formset-button">Add Service
                         </button>
                     </div>
                 </div>
@@ -112,9 +98,8 @@
                 {{ error|escape }}
             {% endfor %}
 
-            <div class="w-full text-center mt-10">
-                <button type="submit" class="w-full text-white bg-green-600 font-bold rounded-lg px-5 py-2.5 text-center
-                hover:bg-green-500 focus:ring focus:ring-green-600 focus:ring-opacity-25 duration-200">
+            <div class="form-button-container">
+                <button type="submit" class="form-button">
                     Create Request
                 </button>
             </div>

@@ -31,20 +31,20 @@
 
                 <h2 class="uppercase text-sm">Fitness</h2>
 
-{#                <a href="{% url 'all_workouts' %}" title="All Workouts" class="flex items-center gap-x-3">#}
-{#                    <i class="fa-solid fa-dumbbell fa-fw hover:text-white dark:hover:text-black duration-200 w-10"></i>#}
-{#                    <p>All Workouts</p>#}
-{#                </a>#}
-{##}
-{#                <a href="{% url 'default_calendar' %}" title="Your Account" class="flex items-center gap-x-3">#}
-{#                    <i class="fa-solid fa-calendar-days fa-fw hover:text-white dark:hover:text-black duration-200"></i>#}
-{#                    <p>Workout Calendar</p>#}
-{#                </a>#}
-{##}
-{#                <a href="{% url 'completed_chart' %}" title="Progress" class="flex items-center gap-x-3">#}
-{#                    <i class="fa-solid fa-chart-line fa-fw hover:text-white dark:hover:text-black duration-200"></i>#}
-{#                    <p>Progress</p>#}
-{#                </a>#}
+                <a href="{% url 'all_workouts' %}" title="All Workouts" class="flex items-center gap-x-3">
+                    <i class="fa-solid fa-dumbbell fa-fw hover:text-white dark:hover:text-black duration-200 w-10"></i>
+                    <p>All Workouts</p>
+                </a>
+
+                <a href="{% url 'default_calendar' %}" title="Your Account" class="flex items-center gap-x-3">
+                    <i class="fa-solid fa-calendar-days fa-fw hover:text-white dark:hover:text-black duration-200"></i>
+                    <p>Workout Calendar</p>
+                </a>
+
+                <a href="{% url 'completed_chart' %}" title="Progress" class="flex items-center gap-x-3">
+                    <i class="fa-solid fa-chart-line fa-fw hover:text-white dark:hover:text-black duration-200"></i>
+                    <p>Progress</p>
+                </a>
             </section>
 
         {% endif %}
@@ -58,6 +58,27 @@
                 <a href="{% url 'payments_index' 'draft' %}" title="Payment Tracking" class="flex items-center gap-x-3">
                     <i class="fa-solid fa-file-invoice-dollar fa-fw hover:text-white dark:hover:text-black duration-200"></i>
                     <p>Payment Tracking</p>
+                </a>
+            </section>
+
+            <section class="flex flex-col gap-y-5">
+                <hr class="opacity-25" />
+
+                <h2 class="uppercase text-sm">Fitness</h2>
+
+                <a href="{% url 'manage_workout_plans' %}" title="Workout Plans" class="flex items-center gap-x-3">
+                    <i class="fa-solid fa-book fa-fw hover:text-white dark:hover:text-black duration-200"></i>
+                    <p>Plans</p>
+                </a>
+
+                <a href="{% url 'manage_workouts' %}" title="Workout Plans" class="flex items-center gap-x-3">
+                    <i class="fa-solid fa-stopwatch fa-fw hover:text-white dark:hover:text-black duration-200"></i>
+                    <p>Workouts</p>
+                </a>
+
+                <a href="{% url 'manage_exercises' %}" title="Workout Plans" class="flex items-center gap-x-3">
+                    <i class="fa-solid fa-dumbbell fa-fw hover:text-white dark:hover:text-black duration-200"></i>
+                    <p>Exercises</p>
                 </a>
             </section>
         {% endif %}
@@ -101,6 +122,7 @@
         </header>
         <hr class="dark:opacity-10">
         <main class="mx-4 md:mx-10 flex-1">
+            {% include 'components/messages.html' %}
             {% block content %}
             {% endblock content %}
         </main>

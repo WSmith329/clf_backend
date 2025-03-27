@@ -1,0 +1,55 @@
+{% extends "body.html" %}
+
+{% block extrahead %}
+  {{ form.media }}
+{% endblock %}
+
+{% block content %}
+    <main class="w-full grow my-10 flex flex-col items-center">
+        <form method="post" class="font-sans w-full md:w-2/3 lg:w-1/3">
+            {% csrf_token %}
+            <div class="form-group">
+                {% for field in exercise_form %}
+                    <div>
+                        <label for="{{ field.id_for_label }}" class="form-label">
+                            {{ field.label }}
+                        </label>
+                        {% if field.name == 'categories' %}
+                                <select id="{{ field.id_for_label }}" name="{{ field.html_name }}"
+                                        class="form-select" multiple size="3">
+                                    {% for value, label in field.field.choices %}
+                                        <option value="{{ value }}" {% if value.instance in field.initial %}selected{% endif %}>
+                                            {{ value.instance }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                        {% elif field.name == 'difficulty' or field.name == 'thumbnail' %}
+                            <select id="{{ field.id_for_label }}" name="{{ field.html_name }}" class="form-select">
+                                {% for value, label in field.field.choices %}
+                                    <option value="{{ value }}" {% if field.value == value %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        {% elif field.name == 'instructions' %}
+                            {{ field }}
+                        {% else %}
+                            <div class="form-field">
+                                <input type="{{ field.widget_type }}" placeholder="{% if field.field.widget.attrs.placeholder %}{{ field.field.widget.attrs.placeholder }}{% else %}{{ field.label }}{% endif %}"
+                                       id="{{ field.id_for_label }}" name="{{ field.html_name }}" class="form-input"
+                                       {% if field.value %}value="{{ field.value }}"{% endif %}>
+                            </div>
+                        {% endif %}
+                        <div class="form-error">{{ field.errors }}</div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="form-button-container order-last">
+                <button type="submit" class="form-button">
+                    Submit
+                </button>
+            </div>
+        </form>
+    </main>
+{% endblock content %}

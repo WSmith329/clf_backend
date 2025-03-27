@@ -52,8 +52,11 @@ INSTALLED_APPS = [
 
     'admin_extra_buttons',
     'adminfilters',
+    'adminsortable2',
     'constance',
+    'django_extensions',
     'django_jsonform',
+    'durationwidget',
     'fontawesomefree',
     'phonenumber_field',
     'tailwind',
@@ -61,6 +64,8 @@ INSTALLED_APPS = [
     'widget_tweaks',
 
     'client_management',
+    'common',
+    'fitness',
     'theme'
 ]
 

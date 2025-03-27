@@ -9,7 +9,87 @@
   --font-serif: "Cormorant", serif;
 }
 
-.fade-out {
-    opacity: 0;
-    transition: opacity 0.5s ease-out;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .form-label {
+    @apply uppercase font-semibold text-sm text-gray-800 dark:text-gray-200 block;
+  }
+
+  .form-field {
+    @apply flex pt-1;
+  }
+
+  .form-input,
+  .form-select {
+    @apply w-full rounded-lg bg-white dark:bg-black border border-neutral-300 dark:border-neutral-700
+      text-black dark:text-neutral-100 text-sm p-2.5 focus:ring-primary focus:ring-opacity-25 focus:border-primary;
+  }
+
+  .form-select {
+    @apply py-2.5; /* override default select appearance padding */
+  }
+
+  .form-checkbox {
+    @apply rounded-sm text-primary bg-white border-neutral-300 focus:ring-primary dark:ring-offset-neutral-700
+      focus:ring-2 dark:bg-neutral-700 dark:border-gray-700
+  }
+
+  .form-checkbox-container {
+    @apply flex flex-wrap items-center justify-between gap-x-2 mr-5
+  }
+
+  .form-error {
+    @apply text-red-600 text-sm mt-1;
+  }
+
+  .form-button {
+    @apply w-full text-white bg-green-600 font-bold rounded-lg px-5 py-2.5 text-center
+      hover:bg-green-500 focus:ring focus:ring-green-600 focus:ring-opacity-25 transition duration-200;
+  }
+
+  .form-button-container {
+    @apply w-full text-center mt-10;
+  }
+
+  .formset-button {
+    @apply text-white text-sm bg-green-600 font-bold rounded-lg px-3 py-1.5 text-center
+      hover:bg-green-500 focus:ring focus:ring-green-600 focus:ring-opacity-25 transition duration-200;
+  }
+
+  .formset-button-container {
+    @apply flex justify-end;
+  }
+
+  .form-button-small {
+    @apply rounded-lg px-2.5 font-semibold text-center text-xs md:text-sm hover:brightness-105
+    focus:ring focus:ring-opacity-25 duration-200
+  }
+
+  .form-button-primary {
+    @apply text-white bg-primary focus:ring-primary
+  }
+
+  .form-button-neutral {
+    @apply text-white bg-neutral-500 focus:ring-neutral-500
+  }
+
+  .form-group {
+    @apply flex flex-col gap-y-5;
+  }
+
+  .formset-group {
+    @apply flex flex-col gap-y-3;
+  }
+
+  .formset-form {
+    @apply flex flex-col md:flex-row gap-x-5 w-full;
+  }
+
+  .create-button {
+    @apply bg-green-600 text-white rounded-full hover:bg-green-500 duration-200 px-3 py-2 cursor-pointer flex
+    items-center gap-x-2 w-fit
+  }
 }

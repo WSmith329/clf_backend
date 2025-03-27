@@ -1,0 +1,49 @@
+{% extends "body.html" %}
+{% block content %}
+    <main class="w-full grow my-10 flex flex-col items-center">
+        <nav class="w-full flex flex-col md:flex-row gap-y-4 relative justify-center mb-5 md:mb-10">
+            <div class="bg-neutral-200 rounded-full text-sm md:text-lg overflow-hidden border-4 border-neutral-200">
+                <a href="{% url 'manage_workout_plans' %}" class="px-5 py-1 font-semibold hover:bg-white
+                hover:bg-opacity-65 duration-200 hover:text-primary
+                {% if activity == 'workout_plans' %}bg-primary text-white{% endif %}">
+                    Plans
+                </a>
+                <a href="{% url 'manage_workouts' %}" class="px-5 py-1 font-semibold hover:bg-white
+                hover:bg-opacity-65 duration-200 hover:text-primary
+                {% if activity == 'workouts' %}bg-primary text-white{% endif %}">
+                    Workouts
+                </a>
+                <a href="{% url 'manage_exercises' %}" class="px-5 py-1 font-semibold hover:bg-white
+                hover:bg-opacity-65 duration-200 hover:text-primary
+                {% if activity == 'exercises' %}bg-primary text-white{% endif %}">
+                    Exercises
+                </a>
+            </div>
+            <div class="md:absolute md:left-full md:-translate-x-full md:top-1/2 md:-translate-y-1/2 text-nowrap
+            font-sans text-xs md:text-sm flex gap-x-2 justify-end">
+                {% if activity == 'workout_plans' %}
+                    <a href="{% url 'create_workout_plan' %}"
+                       class="bg-green-600 text-white rounded-full hover:bg-green-500 duration-200 px-3 py-2
+                       cursor-pointer flex items-center gap-x-2 w-fit">
+                        <i class="fa-solid fa-circle-plus"></i>Create Plan
+                    </a>
+                {% elif activity == 'workouts' %}
+                    <a href="{% url 'create_workout' %}"
+                       class="bg-green-600 text-white rounded-full hover:bg-green-500 duration-200 px-3 py-2
+                       cursor-pointer flex items-center gap-x-2 w-fit">
+                        <i class="fa-solid fa-circle-plus"></i>Create Workout
+                    </a>
+                {% elif activity == 'exercises' %}
+                    <a href="{% url 'create_exercise' %}"
+                       class="create-button">
+                        <i class="fa-solid fa-circle-plus"></i>Create Exercise
+                    </a>
+                {% endif %}
+            </div>
+        </nav>
+        <div class="font-sans w-full md:w-2/3">
+            {% block activities_table %}
+            {% endblock activities_table %}
+        </div>
+    </main>
+{% endblock content %}

@@ -16,7 +16,7 @@ test:  # Run unit tests
 	python -m pytest
 
 test-cov:  # Run unit tests and record code coverage
-	python -m pytest --cov --cov-report=html:coverage_re --cov-config=./tests/.coveragerc
+	python -m pytest --cov --cov-report=html:~coverage_re --cov-config=./tests/.coveragerc
 	echo 'http://localhost:63342/clf_backend/~coverage_re/index.html'
 
 tailwind:  # Run tailwind for development

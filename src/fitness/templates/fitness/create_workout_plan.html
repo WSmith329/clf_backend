@@ -1,0 +1,134 @@
+{% extends "body.html" %}
+
+{% block content %}
+    <main class="w-full grow my-10 flex flex-col items-center">
+        <form method="post" class="font-sans w-full md:w-2/3 lg:w-1/3">
+            {% csrf_token %}
+            <div class="form-group">
+                {% for field in workout_plan_form %}
+                    <div>
+                        <label for="{{ field.id_for_label }}" class="form-label">
+                            {{ field.label }}
+                        </label>
+                        <div class="form-field">
+                            {% if field.name == 'client' %}
+                                <select id="{{ field.id_for_label }}" name="{{ field.html_name }}" class="form-select">
+                                    {% for value, label in field.field.choices %}
+                                        <option value="{{ value }}" {% if field.value == value %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            {% endif %}
+                        </div>
+                        <div class="form-error">{{ field.errors }}</div>
+                    </div>
+                {% endfor %}
+
+                <div class="formset-group">
+                    {{ workout_assignment_formset.management_form }}
+                    <div id="formset-container" class="formset-group">
+                        {% for form in workout_assignment_formset %}
+                            <div class="formset-form flex-col gap-y-2">
+                                <div>
+                                    <label for="{{ form.workout.id_for_label }}"
+                                           class="form-label">
+                                        {{ form.workout.label }} #{{ forloop.counter }}
+                                    </label>
+                                    <select id="{{ form.workout.id_for_label }}" name="{{ form.workout.html_name }}"
+                                            class="form-select">
+                                        {% for value, label in form.workout.field.choices %}
+                                            <option value="{{ value }}"
+                                                    {% if form.workout.value == value %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <label for="{{ form.weekday.id_for_label }}"
+                                       class="form-label">
+                                    {{ form.weekday.label }}
+                                </label>
+                                <div id="{{ form.weekday.auto_id }}" class="form-checkbox-container">
+                                    {% for choice in form.weekday %}
+                                        <div><label for="{{ choice.id_for_label }}" class="form-checkbox-container">
+                                            <input type="checkbox" class="form-checkbox" name="{{ choice.data.name }}"
+                                                   value="{{ choice.data.value }}" id="{{ choice.id_for_label }}"
+                                                   {% if choice.data.selected %}checked{% endif %}>
+                                            {{ choice.choice_label }}
+                                        </label></div>
+                                    {% endfor %}
+                                </div>
+                                <div>
+                                    <input type="hidden" id="{{ form.id.id_for_label }}"
+                                           name="{{ form.id.html_name }}" {% if form.id.value %} value="{{ form.id.value }}" {% endif %}>
+                                    <input type="hidden" id="{{ form.payment.id_for_label }}"
+                                           name="{{ form.payment.html_name }}" {% if form.payment.value %} value="{{ form.payment.value }}" {% endif %}>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="formset-button-container">
+                        <button type="button" id="add-form" class="formset-button">Add Workout
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {% for error in workout_plan_form.non_field_errors %}
+                {{ error|escape }}
+            {% endfor %}
+
+            <div class="form-button-container">
+                <button type="submit" class="form-button">
+                    Submit
+                </button>
+            </div>
+        </form>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const formsetContainer = document.querySelector('#formset-container');
+            const addButton = document.querySelector('#add-form');
+
+            let totalForms = document.querySelector('#id_workoutassignment_set-TOTAL_FORMS');
+            let formsetForm = document.querySelectorAll('.formset-form');
+
+            let formNum = formsetForm.length - 1;
+
+            addButton.addEventListener('click', (e) => {
+                e.preventDefault()
+
+                const newForm = formsetForm[0].cloneNode(true);
+
+                const formsetPrefix = 'workoutassignment_set';
+                const formRegex = new RegExp(`${formsetPrefix}-(\\d+)-`, 'g');
+
+
+                formNum++
+                newForm.innerHTML = newForm.innerHTML.replace(formRegex, `${formsetPrefix}-${formNum}-`);
+
+                newForm.querySelectorAll('input, select, textarea').forEach(input => {
+                    if (input.name) {
+                        input.name = input.name.replace(formRegex, `${formsetPrefix}-${formNum}-`);
+                    }
+                    if (input.id) {
+                        input.id = input.id.replace(formRegex, `${formsetPrefix}-${formNum}-`);
+                    }
+                    if (input.type === 'checkbox' || input.type === 'radio') {
+                        input.checked = false;
+                    } else {
+                        input.value = ''; // Clear input values
+                    }
+                });
+
+                newForm.querySelectorAll('label').forEach(label => {
+                    label.innerHTML = label.innerHTML.replace(/#\d+/, `#${formNum + 1}`);
+                });
+
+                formsetContainer.appendChild(newForm);
+
+                totalForms.value = formNum + 1;
+            });
+        });
+    </script>
+{% endblock content %}

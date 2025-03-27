@@ -1,0 +1,65 @@
+{% extends "body.html" %}
+
+{% load timedelta_extras %}
+
+{% block content %}
+    <main class="w-full grow my-10 flex flex-col items-center">
+        <form method="post" class="font-sans w-full md:w-2/3 lg:w-1/3">
+            {% csrf_token %}
+            <div class="form-group">
+                {% for field in workout_form %}
+                    <div>
+                        <label for="{{ field.id_for_label }}" class="form-label">
+                            {{ field.label }}
+                        </label>
+                        <div class="form-field">
+                            {% if field.name == 'categories' or field.name == 'exercises' %}
+                                <select id="{{ field.id_for_label }}" name="{{ field.html_name }}"
+                                        class="form-select" multiple size="3">
+                                    {% for value, label in field.field.choices %}
+                                        <option value="{{ value }}" {% if value.instance in field.initial %}selected{% endif %}>
+                                            {{ value.instance }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            {% elif field.name == 'difficulty'  or field.name == 'thumbnail' %}
+                                <select id="{{ field.id_for_label }}" name="{{ field.html_name }}" class="form-select">
+                                    {% for value, label in field.field.choices %}
+                                        <option value="{{ value }}" {% if field.value == value %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            {% elif field.name == 'duration' %}
+                                <div class="flex gap-x-5">
+                                    <div class="flex items-center gap-x-2">
+                                        <input type="number" name="duration_0" id="id_duration_0" step="1"
+                                               value="{{ field.initial|timedelta_hours }}" class="form-input w-16" />
+                                        <span class="help" style="display: inline;">Hours&nbsp;&nbsp;</span>
+                                    </div>
+                                    <div class="flex items-center gap-x-2">
+                                        <input type="number" name="duration_1" id="id_duration_1" step="1"
+                                               value="{{ field.initial|timedelta_remaining_minutes }}"
+                                               class="form-input w-16" />
+                                        <span class="help" style="display: inline;">Minutes&nbsp;&nbsp;</span>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <input type="{{ field.widget_type }}" placeholder="{{ field.label }}"
+                                       id="{{ field.id_for_label }}" name="{{ field.html_name }}" class="form-input"
+                                       {% if field.value %}value="{{ field.value }}"{% endif %}>
+                            {% endif %}
+                        </div>
+                        <div class="form-error">{{ field.errors }}</div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="form-button-container">
+                <button type="submit" class="form-button">
+                    Submit
+                </button>
+            </div>
+        </form>
+    </main>
+{% endblock content %}
