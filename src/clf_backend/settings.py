@@ -216,6 +216,6 @@ GOOGLE_SHEETS_CONFIG = {
 
 # Login URLs
 
-LOGIN_URL = '/accounts/login'
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/'
+LOGIN_URL = f'{env("BASE_URL")}accounts/login'
+LOGIN_REDIRECT_URL = env("BASE_URL")
+LOGOUT_REDIRECT_URL = env("BASE_URL")
