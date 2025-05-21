@@ -1,15 +1,75 @@
 import datetime
+import string
 
 from constance import config
 from django.contrib import messages
+from django.contrib.auth.models import User
 from django.core.paginator import Paginator
+from django.db import transaction
+from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_http_methods
+from django.views.generic import ListView, FormView
 
-from .forms import MeasurementRecordingForm, PaymentRequestForm, SubscriptionFormSet, StartingInvoiceNumberForm
-from .models import Payment, Subscription
+from .controllers.client_invite import ClientInviter
+from .forms import MeasurementRecordingForm, PaymentRequestForm, SubscriptionFormSet, StartingInvoiceNumberForm, \
+    CreateClientForm
+from .models import Payment, Subscription, Client
+from .utils import generate_random_password
+
+
+class CreateClientView(FormView):
+    template_name = 'client_management/create_client.html'
+    form_class = CreateClientForm
+    success_url = reverse_lazy('manage_clients')
+
+    def form_valid(self, form):
+        try:
+            with transaction.atomic():
+                user = form.save()
+                client = Client.objects.create(user=user)
+                ClientInviter(client.pk, self.request).send_client_invite()
+        except Exception as e:
+            form.add_error(None, 'Failed to send client invitation. Nothing was saved.')
+            return self.form_invalid(form)
+
+        messages.success(self.request, f'Client registered with email {user.email}.')
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'title': 'Register a new client',
+            'message': (
+                'Enter the email address, first name, and last name of a new client to register them on the '
+                'system. An invitation will be sent to their email with a link for them to set their password.'
+            ),
+        })
+        return context
+
+
+class ClientListView(ListView):
+    model = Client
+    paginate_by = 10
+    context_object_name = 'clients'
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        query = self.request.GET.get('client_name')
+        if query:
+            queryset = queryset.filter(
+                Q(user__first_name__icontains=query) |
+                Q(user__last_name__icontains=query)
+            )
+        return queryset
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Clients'
+        context['searched_client'] = self.request.GET.get('client_name', '')
+        return context
 
 
 @require_http_methods(['GET', 'POST'])

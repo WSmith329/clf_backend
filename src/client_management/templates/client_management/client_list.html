@@ -1,0 +1,59 @@
+{% extends "body.html" %}
+
+{% block content %}
+    <main class="w-full grow my-10 flex flex-col items-center">
+        <div class="font-sans w-full md:w-2/3">
+            <form method="GET" action="">
+                <div class="flex justify-start mb-5 md:mb-10 gap-x-4">
+                    <label>
+                        <input type="text" name="client_name" class="form-input" placeholder="Client Name"
+                               value="{{ searched_client }}">
+                    </label>
+                    <div class="flex gap-x-2">
+                        <button type="submit" class="form-button-primary form-button-small">
+                            Search
+                        </button>
+                        <a href="{% url 'manage_clients' %}"
+                           class="form-button-neutral form-button-small flex items-center">Reset</a>
+                    </div>
+                </div>
+            </form>
+            <section class="grid grid-cols-12">
+                <div class="col-span-3 row-span-1 uppercase font-semibold text-xs md:text-sm text-center flex justify-center pb-2">
+                    Name
+                </div>
+                <div class="col-span-6 row-span-1 uppercase font-semibold text-xs md:text-sm text-center flex justify-center pb-2">
+                    Email
+                </div>
+                <div class="col-span-3 row-span-1 uppercase font-semibold text-xs md:text-sm text-center flex justify-center pb-2">
+                    Actions
+                </div>
+                {% for client in object_list %}
+                    <div class="col-span-3 row-span-1 flex justify-center items-center py-3 text-xs md:text-base
+                    text-center {% cycle 'bg-neutral-100' 'bg-white' %}">
+                        {{ client.user.get_full_name }}
+                    </div>
+                    <div class="col-span-6 row-span-1 flex justify-center items-center py-3 text-xs md:text-base
+                    text-center {% cycle 'bg-neutral-100' 'bg-white' %}">
+                        {{ client.user.email }}
+                    </div>
+                    <div class="col-span-3 row-span-1 flex flex-col md:flex-row justify-center items-center py-6
+                    text-center gap-x-1 gap-y-1 {% cycle 'bg-neutral-100' 'bg-white' %}">
+                        <form name="manage_workout_plans" method="post" action="{% url 'manage_workout_plans' %}"
+                              class="m-0 p-0">
+                            {% csrf_token %}
+                            <input type="hidden" value="{{ client.user.get_full_name }}" name="client_name">
+                            <input type="submit" value="Workout Plans"
+                                   class="text-xs md:text-sm bg-neutral-600 text-white px-2 py-1 rounded-full
+                                   hover:bg-neutral-500 duration-200 cursor-pointer">
+                        </form>
+                    </div>
+                {% empty %}
+                    <div class="col-span-11 row-span-1 flex justify-center items-center py-3">
+                        No clients to show.
+                    </div>
+                {% endfor %}
+            </section>
+        </div>
+    </main>
+{% endblock content %}

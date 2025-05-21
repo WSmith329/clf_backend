@@ -4,8 +4,6 @@ from pathlib import Path
 
 import freezegun
 import pytest
-from constance import config
-from constance.test import override_config
 from django.utils.safestring import mark_safe
 
 
@@ -17,7 +15,7 @@ def sample_invoice_email_template():
 
 
 @freezegun.freeze_time(datetime.date(2025, 2, 26))
-def test_send_payment_request(payment, sample_invoice_email_template, monkeypatch, mailoutbox):
+def test_send_payment_request(payment, sample_invoice_email_template, mailoutbox):
     payment.due_date = datetime.date.today()
     payment.save()
 

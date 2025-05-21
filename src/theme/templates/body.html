@@ -53,6 +53,22 @@
             <section class="flex flex-col gap-y-5">
                 <hr class="opacity-25" />
 
+                <h2 class="uppercase text-sm">Client</h2>
+
+                <a href="{% url 'manage_clients' %}" title="Manage Clients" class="flex items-center gap-x-3">
+                    <i class="fa-solid fa-users fa-fw hover:text-white dark:hover:text-black duration-200"></i>
+                    <p>Clients</p>
+                </a>
+
+                <a href="{% url 'create_client' %}" title="Add New Client" class="flex items-center gap-x-3">
+                    <i class="fa-solid fa-user-plus fa-fw hover:text-white dark:hover:text-black duration-200"></i>
+                    <p>Add New Client</p>
+                </a>
+            </section>
+
+            <section class="flex flex-col gap-y-5">
+                <hr class="opacity-25" />
+
                 <h2 class="uppercase text-sm">Finance</h2>
 
                 <a href="{% url 'payments_index' 'draft' %}" title="Payment Tracking" class="flex items-center gap-x-3">

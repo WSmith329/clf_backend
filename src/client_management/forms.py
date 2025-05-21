@@ -1,8 +1,31 @@
+from django.contrib.auth.models import User
 from django.forms import ModelForm, DateField, forms, widgets, BooleanField, inlineformset_factory, IntegerField, \
-    DateInput
+    DateInput, EmailField, CharField
 from django.utils import timezone
 
 from client_management.models import MeasurementRecording, Payment, Subscription
+from client_management.utils import generate_random_password
+
+
+class CreateClientForm(ModelForm):
+    class Meta:
+        model = User
+        fields = ['email', 'first_name', 'last_name']
+
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        if User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError('A user with that email already exists.')
+        return email
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.username = self.cleaned_data['email']
+        user.set_password(generate_random_password())
+        user.is_active = True
+        if commit:
+            user.save()
+        return user
 
 
 class MeasurementRecordingForm(ModelForm):

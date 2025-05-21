@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Invite to {{ first_name }} {{ last_name }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        div {
+            padding-bottom: 1pt;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <p>Hi {{ first_name }},</p>
+    </div>
+
+    <div>
+        <p>Welcome to Chloe Leanne Fitness!</p>
+    </div>
+
+    <div>
+        <p>Please use the link below to set your password.</p>
+        <a href="{{ password_reset_link }}">Reset Password</a>
+    </div>
+
+    <div>
+        <p>Please don't hesitate to get in touch if you have any questions or need clarifications.</p>
+    </div>
+
+    <p>Best regards,</p>
+    <p>Chloe</p>
+</body>
+</html>

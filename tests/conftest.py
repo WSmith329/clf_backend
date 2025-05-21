@@ -21,7 +21,8 @@ def user(db, django_user_model):
         username='test_user',
         password='test_pass',
         email='user@testmail.com',
-        first_name='Test'
+        first_name='Test',
+        last_name='User'
     )
 
 
