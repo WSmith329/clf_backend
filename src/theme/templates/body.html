@@ -15,16 +15,16 @@
             </button>
         </section>
 
-        <section class="flex flex-col gap-y-5">
-            <hr class="opacity-25" />
-
-            <a href="{% url 'dashboard' %}" title="Dashboard" class="flex items-center gap-x-3">
-                <i class="fa-solid fa-rocket fa-fw hover:text-white dark:hover:text-black duration-200"></i>
-                <p>Dashboard</p>
-            </a>
-        </section>
-
         {% if request.user.client %}
+
+            <section class="flex flex-col gap-y-5">
+                <hr class="opacity-25" />
+
+                <a href="{% url 'dashboard' %}" title="Dashboard" class="flex items-center gap-x-3">
+                    <i class="fa-solid fa-rocket fa-fw hover:text-white dark:hover:text-black duration-200"></i>
+                    <p>Dashboard</p>
+                </a>
+            </section>
 
             <section class="flex flex-col gap-y-5">
                 <hr class="opacity-25" />
