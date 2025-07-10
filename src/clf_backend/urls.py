@@ -21,6 +21,7 @@ urlpatterns = (([
     path('accounts/', include('django.contrib.auth.urls')),
     path('accounts/', include('client_management.urls')),
     path('fitness/', include('fitness.urls')),
+    path('notifications/', include('feed.urls')),
 ]
     + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT))
     + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT))

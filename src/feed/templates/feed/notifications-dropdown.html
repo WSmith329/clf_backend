@@ -1,0 +1,94 @@
+<div id="notifications-wrapper" class="relative" aria-expanded="false" aria-controls="notification-dropdown">
+    <button id="notification-button" type="button" class="relative">
+        <i class="fa-solid fa-xl fa-bell"></i>
+        {% if has_new_notification %}
+            <span class="absolute -top-2.5 -right-1 block h-3 w-3 rounded-full bg-red-500"></span>
+        {% endif %}
+    </button>
+    <div id="notification-dropdown" class="hidden absolute right-0 mt-3 w-80 bg-white dark:bg-neutral-900 border
+    dark:border-neutral-800 rounded-xl shadow-lg z-50 overflow-hidden font-sans">
+        <div class="py-2.5 font-bold bg-neutral-100 border-b-2 border-b-neutral-200">Notifications</div>
+        {% for notification in notifications %}
+            <div class="w-full text-center p-2.5 {% if not forloop.last %} border-b-2 border-b-neutral-100 {% endif %}
+                        {% if not notification.seen %} bg-neutral-50 {% endif %}">
+                {{ notification.action }}
+            </div>
+        {% empty %}
+            <div class="w-full text-center p-2.5">
+                No new notifications.
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    const csrftoken = "{{ csrf_token }}";
+    let hasMarkedSeen = false;
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const button = document.getElementById("notification-button");
+        const dropdown = document.getElementById("notification-dropdown");
+
+        button.addEventListener("click", function (e) {
+            e.stopPropagation();
+            const isHidden = dropdown.classList.toggle("hidden");
+            button.setAttribute("aria-expanded", !isHidden);
+
+            if (!isHidden && !hasMarkedSeen) {
+                document.title = document.title.replace(/\s*\(\d+\)\s*$/, "");
+
+                fetch("{% url 'mark_notifications_seen' %}", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": csrftoken,
+                        "Content-Type": "application/json"
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        hasMarkedSeen = true;
+
+                        // Optionally remove the red dot
+                        const dot = button.querySelector("span");
+                        if (dot) dot.remove();
+                    }
+                });
+            }
+        });
+
+        // CSRF helper
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let cookie of cookies) {
+                    cookie = cookie.trim();
+                    if (cookie.startsWith(name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        document.addEventListener("click", function () {
+            dropdown.classList.add("hidden");
+        });
+
+        dropdown.addEventListener("click", function (e) {
+            e.stopPropagation();
+        });
+    });
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const unreadCount = {{ unread_count|default:0 }};
+
+    if (unreadCount > 0) {
+        document.title = document.title + ` (${unreadCount})`;
+    }
+});
+</script>
