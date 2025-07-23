@@ -1,8 +1,10 @@
 import datetime
 import io
+import logging
 
 import numpy as np
 import pandas as pd
+import sentry_sdk
 from django.conf import settings
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.core.mail import EmailMessage
@@ -13,6 +15,8 @@ from weasyprint import HTML
 
 from client_management.controllers.google_sheets import GoogleSheetsClient
 from client_management.models import Payment
+
+logger = logging.getLogger(__name__)
 
 
 class PaymentSheetGenerator:
@@ -52,19 +56,24 @@ class PaymentSheetGenerator:
         return df
 
     def generate(self, payments):
-        payments = payments.annotate(
-            what_for=ArrayAgg(
-                Concat('subscription__weeks', Value(' weeks x '), 'subscription__sessions', Value(' sessions of '), 'services__name', output_field=CharField()),
-                distinct=True
-            )
-        ).order_by('completed_date')
-        payments = list(payments.values(*self.MAPPING.values()))
+        try:
+            payments = payments.annotate(
+                what_for=ArrayAgg(
+                    Concat('subscription__weeks', Value(' weeks x '), 'subscription__sessions', Value(' sessions of '), 'services__name', output_field=CharField()),
+                    distinct=True
+                )
+            ).order_by('completed_date')
+            payments = list(payments.values(*self.MAPPING.values()))
 
-        df = self._construct_dataframe(payments)
+            df = self._construct_dataframe(payments)
 
-        sheet_name = f'Invoices-{datetime.datetime.now().strftime("%Y-%m-%d-%H:%M:%S")}'
+            sheet_name = f'Invoices-{datetime.datetime.now().strftime("%Y-%m-%d-%H:%M:%S")}'
 
-        GoogleSheetsClient().create_sheet_from_dataframe(df, sheet_name)
+            GoogleSheetsClient().create_sheet_from_dataframe(df, sheet_name)
+        except Exception as e:
+            logger.exception(f'Payments spreadsheet generation failed: {e}')
+            sentry_sdk.capture_exception(e)
+            raise e
 
     def _format_dates(self, df):
         for col in self.DATE_COLUMNS:
@@ -93,21 +102,26 @@ class PaymentRequestHandler:
         }
 
     def send_payment_request(self) -> None:
-        pdf_buffer = self.generate_payment_invoice_pdf()
+        try:
+            pdf_buffer = self.generate_payment_invoice_pdf()
 
-        subject = 'PT Invoice'
-        body = render_to_string(self.PAYMENT_EMAIL_TEMPLATE, self.context)
-        from_email = settings.EMAIL_HOST_USER
-        to_email = [self.client.user.email]
+            subject = 'PT Invoice'
+            body = render_to_string(self.PAYMENT_EMAIL_TEMPLATE, self.context)
+            from_email = settings.EMAIL_HOST_USER
+            to_email = [self.client.user.email]
 
-        email = EmailMessage(subject, body, from_email, to_email)
-        email.attach(f'Invoice {self.client.user.first_name} {self.payment.invoice_code}.pdf',
-                     pdf_buffer.read(), 'application/pdf')
-        email.content_subtype = 'html'
+            email = EmailMessage(subject, body, from_email, to_email)
+            email.attach(f'Invoice {self.client.user.first_name} {self.payment.invoice_code}.pdf',
+                         pdf_buffer.read(), 'application/pdf')
+            email.content_subtype = 'html'
 
-        email.send()
+            email.send()
 
-        pdf_buffer.close()
+            pdf_buffer.close()
+        except Exception as e:
+            logger.exception(f'Payment request processing for {self.payment.invoice_code} failed: {e}')
+            sentry_sdk.capture_exception(e)
+            raise e
 
     def generate_payment_invoice_pdf(self) -> io.BytesIO:
         html_content = render_to_string(self.PAYMENT_INVOICE_TEMPLATE, self.context)

@@ -1,8 +1,12 @@
 import os
+import logging
 
 import gspread
 import pandas as pd
+import sentry_sdk
 from django.conf import settings
+
+logger = logging.getLogger(__name__)
 
 
 class GoogleSheetsClient:
@@ -20,5 +24,10 @@ class GoogleSheetsClient:
         return spreadsheet
 
     def create_sheet_from_dataframe(self, df: pd.DataFrame, sheet_name):  # pragma: no cover
-        spreadsheet = self.create_spreadsheet(sheet_name)
-        spreadsheet.get_worksheet(0).update([df.columns.values.tolist()] + df.values.tolist())
+        try:
+            spreadsheet = self.create_spreadsheet(sheet_name)
+            spreadsheet.get_worksheet(0).update([df.columns.values.tolist()] + df.values.tolist())
+        except Exception as e:
+            logger.exception(f'DataFrame to Google Sheet process failed: {e}')
+            sentry_sdk.capture_exception(e)
+            raise e

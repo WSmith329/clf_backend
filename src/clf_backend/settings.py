@@ -39,6 +39,20 @@ INTERNAL_IPS = [
     "127.0.0.1",
 ]
 
+# SENTRY
+if SENTRY_DSN := env('SENTRY_DSN'):
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        send_default_pii=True,
+        integrations=[
+            DjangoIntegration()
+        ]
+    )
+
+
 # Application definition
 
 INSTALLED_APPS = [

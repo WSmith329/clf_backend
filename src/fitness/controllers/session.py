@@ -1,9 +1,13 @@
 import re
+import logging
 
+import sentry_sdk
 from django.core.exceptions import ValidationError
 
 from feed.controllers.log import log_public_action
 from fitness.models import WorkoutSession, SessionExercise
+
+logger = logging.getLogger(__name__)
 
 
 class SessionInputProcessor:
@@ -57,9 +61,13 @@ class SessionInputProcessor:
             raise ValidationError(f"Expected {expected_number_of_sets} sets, but received {given_number_of_sets} sets.")
 
     def process(self, log=True):
-        for workout_exercise in self.workout.workoutexercise_set.all():
-            set_recordings = self._extract_set_recordings(workout_exercise)
-            self._create_session_exercise(workout_exercise, set_recordings)
-
-        if log:
-            log_public_action(self.client, 'completed', target=self.workout, action_object=self.session)
+        try:
+            for workout_exercise in self.workout.workoutexercise_set.all():
+                set_recordings = self._extract_set_recordings(workout_exercise)
+                self._create_session_exercise(workout_exercise, set_recordings)
+            if log:
+                log_public_action(self.client, 'completed', target=self.workout, action_object=self.session)
+        except Exception as e:
+            logger.exception(f'Session processing for {self.workout} failed: {e}')
+            sentry_sdk.capture_exception(e)
+            raise e
