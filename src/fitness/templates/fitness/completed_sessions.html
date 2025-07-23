@@ -1,0 +1,54 @@
+{% extends "body.html" %}
+{% block content %}
+    <main class="w-full grow my-10 flex flex-col items-center">
+        <div class="font-sans w-full md:w-2/3">
+            <form method="POST" action="{% url 'completed_sessions' %}">
+                {% csrf_token %}
+                <div class="flex justify-start mb-5 md:mb-10 gap-x-4">
+                    <label>
+                        <input type="text" name="workout_name" class="form-input" placeholder="Workout Name"
+                        {% if searched_workout %}value="{{ searched_workout }}"{% endif %}>
+                    </label>
+                    <div class="flex gap-x-2">
+                        <button type="submit" class="form-button-primary form-button-small">
+                            Search
+                        </button>
+                        <a href="{% url 'completed_sessions' %}"
+                           class="form-button-neutral form-button-small flex items-center">Reset</a>
+                    </div>
+                </div>
+            </form>
+            <div class="grid grid-cols-7">
+                <div class="col-span-3 row-span-1 uppercase font-semibold text-xs md:text-sm text-center flex justify-center pb-2">
+                    Workout
+                </div>
+                <div class="col-span-3 row-span-1 uppercase font-semibold text-xs md:text-sm text-center flex justify-center pb-2">
+                    Date Completed
+                </div>
+                <div class="col-span-1 row-span-1 uppercase font-semibold text-xs md:text-sm text-center flex justify-center pb-2">
+                </div>
+                {% for workout_session in history %}
+                    <div class="col-span-3 row-span-1 flex justify-center items-center py-3 text-xs md:text-base
+                    text-center {% cycle 'bg-neutral-100' 'bg-white' %}">
+                        {{ workout_session.workout.name }}
+                    </div>
+                    <div class="col-span-3 row-span-1 flex justify-center items-center py-3 text-xs md:text-base
+                    text-center {% cycle 'bg-neutral-100' 'bg-white' %}">
+                        {{ workout_session.completed_on }}
+                    </div>
+                    <div class="col-span-1 row-span-1 flex justify-center items-center py-3 text-xs md:text-base
+                    text-center {% cycle 'bg-neutral-100' 'bg-white' %}">
+                        <a href="{% url 'completed_session' workout_session.id %}"
+                           class="hover:text-neutral-400 duration-200">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </a>
+                    </div>
+                {% empty %}
+                    <div class="col-span-11 row-span-1 flex justify-center items-center py-3">
+                        No completed workouts to show.
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </main>
+{% endblock content %}

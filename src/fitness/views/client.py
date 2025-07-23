@@ -51,17 +51,33 @@ def workout(request, workout_slug):
             inputs=list(request.POST.items())
         ).process()
 
-        return redirect('index')
+        return redirect('completed_sessions')
 
     return render(request, 'fitness/workout.html',
                   {'title': requested_workout, 'workout': requested_workout})
 
 
+def completed_sessions(request):
+    workout_name = request.POST.get('workout_name', '').strip()
+
+    workout_sessions = WorkoutSession.objects.filter(completed_by=request.user.client.id).order_by('-completed_on')
+    if workout_name:
+        workout_sessions = workout_sessions.filter(workout__name__icontains=workout_name)
+
+    return render(request, 'fitness/completed_sessions.html',{
+        'title': 'Workout History',
+        'history': workout_sessions,
+        'searched_workout': workout_name
+    })
+
+
 def completed_session(request, session_id):
     requested_session = get_object_or_404(WorkoutSession, id=session_id)
 
-    return render(request, 'fitness/completed_session.html',
-                  {'title': requested_session.workout, 'session': requested_session})
+    return render(request, 'fitness/completed_session.html', {
+        'title': f'{requested_session.workout} ({requested_session.completed_on.strftime("%m-%d-%Y")})',
+        'session': requested_session
+    })
 
 
 def completed_chart(request):

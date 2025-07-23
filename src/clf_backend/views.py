@@ -4,7 +4,7 @@ from django.db.models import Q
 from django.shortcuts import render, redirect
 
 from fitness.forms import CompletedStepsForm
-from fitness.models import CompletedSteps, Steps, WorkoutAssignment
+from fitness.models import CompletedSteps, Steps, WorkoutAssignment, WorkoutSession
 
 
 def account(request):
@@ -35,6 +35,10 @@ def dashboard(request):
         Q(exact_dates__contains=[today]),
         workout_plan__client=current_user.client
     )
+
+    workouts_completed_today = list(WorkoutSession.objects.filter(
+        completed_by=current_user.client, completed_on__date=today
+    ).values_list('workout', flat=True).distinct())
 
     try:
         steps_today = Steps.objects.get(
@@ -69,6 +73,7 @@ def dashboard(request):
         {
             'title': title, 'user': current_user,
             'workout_assignments_today': workout_assignments_today,
+            'workouts_completed_today': workouts_completed_today,
             'steps_today': steps_today,
             'steps_progress': steps_progress,
             'steps_form': form

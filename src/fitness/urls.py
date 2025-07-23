@@ -10,6 +10,7 @@ urlpatterns = [
     path('', login_required(client.index), name='index'),
     path('all-workouts/', login_required(client.all_workouts), name='all_workouts'),
     path('workout/<str:workout_slug>/', login_required(client.workout), name='workout'),
+    path('history/', login_required(client.completed_sessions), name='completed_sessions'),
     path('history/<int:session_id>', login_required(client.completed_session), name='completed_session'),
     path('completed-chart/', login_required(client.completed_chart), name='completed_chart'),
     path('calendar/<int:year>/<int:month>', login_required(client.monthly_calendar), name='calendar'),
