@@ -28,6 +28,27 @@ urlpatterns = [
     path('update-workout/<int:pk>/', staff_member_required(staff.create_workout), name='update_workout'),
     path('delete-workout/<int:pk>/', staff_member_required(staff.delete_workout), name='delete_workout'),
 
+    path(
+        'workout/<int:workout_pk>/add-exercise/',
+        staff_member_required(staff.add_exercise_to_workout),
+        name='add_exercise_to_workout'
+    ),
+    path(
+        'workout/<int:workout_pk>/update-exercise/<int:workout_exercise_pk>/',
+        staff_member_required(staff.add_exercise_to_workout),
+        name='update_workout_exercise'
+    ),
+    path(
+        'delete-workout-exercise/<int:pk>/',
+        staff_member_required(staff.delete_workout_exercise),
+        name='delete_workout_exercise'
+    ),
+    path(
+        'reorder-workout-exercise/<int:pk>/<int:direction>/',
+        staff_member_required(staff.reorder_workout_exercise),
+        name='reorder_workout_exercise'
+    ),
+
     path('manage-workout-plans/', staff_member_required(staff.manage_workout_plans), name='manage_workout_plans'),
     path('create-workout-plan/', staff_member_required(staff.create_workout_plan), name='create_workout_plan'),
     path('update-workout-plan/<int:pk>/', staff_member_required(staff.create_workout_plan), name='update_workout_plan'),

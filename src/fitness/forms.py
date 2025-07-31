@@ -3,7 +3,8 @@ from django.forms import MultiWidget, DateInput, inlineformset_factory
 from durationwidget.widgets import TimeDurationWidget
 
 from common.widgets.json import ListTextInputWidget
-from .models import Workout, WorkoutSession, Steps, Weekday, WorkoutAssignment, CompletedSteps, WorkoutPlan, Exercise
+from .models import Workout, WorkoutSession, Steps, Weekday, WorkoutAssignment, CompletedSteps, WorkoutPlan, Exercise, \
+    WorkoutExercise, Set
 
 
 class MultiDateInputWidget(MultiWidget):
@@ -33,7 +34,22 @@ class WorkoutForm(forms.ModelForm):
     class Meta:
         model = Workout
         fields = '__all__'
-        exclude = ['slug']
+        exclude = ['slug', 'exercises', 'thumbnail']
+
+
+class WorkoutExerciseForm(forms.ModelForm):
+    class Meta:
+        model = WorkoutExercise
+        fields = ['exercise']
+
+
+SetFormSet = inlineformset_factory(
+    WorkoutExercise,
+    Set,
+    fields=['reps', 'until_failure', 'weight_level'],
+    extra=1,
+    can_delete=False
+)
 
 
 class WorkoutPlanForm(forms.ModelForm):

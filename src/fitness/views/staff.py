@@ -1,8 +1,11 @@
 from django.contrib import messages
+from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 
-from fitness.forms import ExerciseForm, WorkoutForm, WorkoutPlanForm, WorkoutAssignmentFormSet
-from fitness.models import Exercise, Workout, WorkoutPlan
+from fitness.forms import ExerciseForm, WorkoutForm, WorkoutPlanForm, WorkoutAssignmentFormSet, WorkoutExerciseForm, \
+    SetFormSet
+from fitness.models import Exercise, Workout, WorkoutPlan, WorkoutExercise
 
 
 def create_exercise(request, pk=None):
@@ -61,7 +64,11 @@ def create_workout(request, pk=None):
                 request,
                 f'Created {workout_form.instance.name}' if is_new else f'Updated {workout_form.instance.name}'
             )
-            return redirect('manage_workouts')
+
+            if 'submit_and_add_another' in request.POST:
+                return redirect('add_exercise_to_workout', workout_id=workout.id)
+            elif 'submit_and_exit' in request.POST:
+                return redirect('manage_workouts')
 
     else:
         workout_form = WorkoutForm(instance=workout, initial=copied_m2m)
@@ -69,6 +76,45 @@ def create_workout(request, pk=None):
     return render(request, 'fitness/create_workout.html', {
         'title': 'Create a new workout' if is_new else 'Update workout',
         'workout_form': workout_form
+    })
+
+
+def add_exercise_to_workout(request, workout_pk, workout_exercise_pk=None):
+    workout = get_object_or_404(Workout, pk=workout_pk)
+    workout_exercise = get_object_or_404(WorkoutExercise, pk=workout_exercise_pk) if workout_exercise_pk else None
+
+    if request.method == 'POST':
+        exercise_form = WorkoutExerciseForm(request.POST, instance=workout_exercise)
+        set_formset = SetFormSet(request.POST, instance=workout_exercise)
+
+        if exercise_form.is_valid() and set_formset.is_valid():
+            workout_exercise = exercise_form.save(commit=False)
+            workout_exercise.workout = workout
+            workout_exercise.save()
+
+            sets = set_formset.save(commit=False)
+            for set in sets:
+                set.workout_exercise = workout_exercise
+                set.save()
+
+            if 'submit_and_add_another' in request.POST:
+                return redirect('add_exercise_to_workout', workout_id=workout.id)
+            elif 'submit_and_exit' in request.POST:
+                manage_workouts_url = reverse('manage_workouts')
+                return redirect(f'{manage_workouts_url}?expand={workout.pk}')
+
+    else:
+        exercise_form = WorkoutExerciseForm(instance=workout_exercise)
+        set_formset = SetFormSet(instance=workout_exercise)
+
+    existing_exercises = WorkoutExercise.objects.filter(workout=workout).prefetch_related('set_set')
+
+    return render(request, 'fitness/add_exercise.html', {
+        'title': f'Add Exercise to {workout.name}',
+        'workout': workout,
+        'exercise_form': exercise_form,
+        'set_formset': set_formset,
+        'existing_exercises': existing_exercises
     })
 
 
@@ -84,7 +130,7 @@ def create_workout_plan(request, pk=None):
             if field.name not in ('id',):  # skip PK
                 setattr(workout_plan, field.name, getattr(original, field.name))
 
-        original_assignments = original.workoutassignment_set.all()  # adjust related name if different
+        original_assignments = original.workoutassignment_set.all()
         for assignment in original_assignments:
             assignment_data = {}
             for field in assignment._meta.fields:
@@ -121,7 +167,7 @@ def create_workout_plan(request, pk=None):
 
 
 def _manage_activities(request, model, template_name, search_field_name, context_key, title, activity,
-                       custom_query_fn=None):
+                       custom_query_fn=None, **kwargs):
     search_query = request.POST.get(search_field_name, '').strip()
 
     if custom_query_fn:
@@ -133,7 +179,8 @@ def _manage_activities(request, model, template_name, search_field_name, context
         'title': title,
         context_key: activities,
         f'searched_{context_key[:-1]}': search_query,
-        'activity': activity
+        'activity': activity,
+        **kwargs
     })
 
 
@@ -151,6 +198,9 @@ def manage_workout_plans(request):
 
 
 def manage_workouts(request):
+    if expand := request.GET.get('expand'):
+        expand = int(expand)
+
     return _manage_activities(
         request,
         model=Workout,
@@ -158,7 +208,8 @@ def manage_workouts(request):
         search_field_name='workout_name',
         context_key='workouts',
         title='Manage workouts',
-        activity='workouts'
+        activity='workouts',
+        expand=expand
     )
 
 
@@ -209,3 +260,23 @@ def delete_exercise(request, pk):
         success_message='Exercise successfully deleted.',
         redirect_url='manage_exercises'
     )
+
+
+def delete_workout_exercise(request, pk):
+    manage_workouts_url = reverse('manage_workouts')
+    workout_pk = get_object_or_404(WorkoutExercise, pk=pk).workout.pk
+
+    return _delete_activity(
+        request,
+        model=WorkoutExercise,
+        pk=pk,
+        success_message='Exercise successfully removed from workout.',
+        redirect_url=f'{manage_workouts_url}?expand={workout_pk}'
+    )
+
+
+def reorder_workout_exercise(request, pk, direction):
+    workout_exercise = get_object_or_404(WorkoutExercise, pk=pk)
+    workout_exercise.reorder(direction)
+    manage_workouts_url = reverse('manage_workouts')
+    return redirect(f'{manage_workouts_url}?expand={workout_exercise.workout.pk}')

@@ -1,4 +1,5 @@
 {% extends "fitness/manage_activities.html" %}
+
 {% block activities_table %}
     <form method="POST" action="{% url 'manage_workouts' %}">
         {% csrf_token %}
@@ -17,34 +18,38 @@
         </div>
     </form>
     <div class="grid grid-cols-12">
-        <div class="col-span-3 row-span-1 uppercase font-semibold text-xs md:text-sm text-center flex justify-center pb-2">
+        <div class="col-span-1 row-span-1 pb-2"></div>
+        <div class="col-span-4 row-span-1 uppercase font-semibold text-xs md:text-sm text-center flex justify-center pb-2">
             Name
         </div>
-        <div class="col-span-6 row-span-1 uppercase font-semibold text-xs md:text-sm text-center flex justify-center pb-2">
+        <div class="col-span-2 row-span-1 uppercase font-semibold text-xs md:text-sm text-center flex justify-center pb-2">
             Exercises
         </div>
-        <div class="col-span-3 row-span-1 uppercase font-semibold text-xs md:text-sm text-center flex justify-center pb-2">
+        <div class="col-span-5 row-span-1 uppercase font-semibold text-xs md:text-sm text-center flex justify-center pb-2">
             Actions
         </div>
         {% for workout in workouts %}
-            <div class="col-span-3 row-span-1 flex justify-center items-center py-3 text-xs md:text-base
+            <div class="col-span-1 row-span-1  flex justify-center items-center py-3 text-xs md:text-base
+            text-center {% cycle 'bg-neutral-100' 'bg-white' %}">
+                <button onclick="toggleExercises('{{ workout.id }}')"
+                        class="text-neutral-600 hover:text-neutral-500 duration-200">
+                    <i id="exercises-{{ workout.id }}-button-icon"
+                       class="fa-solid fa-caret-{% if expand == workout.id %}up{% else %}down{% endif %} fa-lg"></i>
+                </button>
+            </div>
+            <div class="col-span-4 row-span-1 flex justify-center items-center py-3 text-xs md:text-base
             text-center {% cycle 'bg-neutral-100' 'bg-white' %}">
                 {{ workout.name }}
             </div>
-            <div class="col-span-6 row-span-1 flex justify-center items-center py-3 text-xs md:text-base
+            <div class="col-span-2 row-span-1 flex justify-center items-center py-3 text-xs md:text-base
             text-center {% cycle 'bg-neutral-100' 'bg-white' %}">
-                {% for exercise in workout.exercises.all %}
-                    <a href="{% url 'update_exercise' exercise.id %}" class="hover:text-neutral-600 duration-200">
-                        {{ exercise.name }} <i class="fa-solid fa-pen-to-square"></i>
-                        {% if not forloop.last %},{% endif %}
-                    </a>
-                {% endfor %}
+                {{ workout.exercises.count }}
             </div>
-            <div class="col-span-3 row-span-1 flex flex-col md:flex-row justify-center items-center py-6
+            <div class="col-span-5 row-span-1 flex flex-col md:flex-row justify-center items-center py-6
             text-center gap-x-1 gap-y-1 {% cycle 'bg-neutral-100' 'bg-white' %}">
                 <a href="{% url 'update_workout' workout.id %}"
-                   class="text-xs md:text-sm bg-neutral-600 text-white px-2 py-1 rounded-full
-                   hover:bg-neutral-500 duration-200">
+                   class="text-xs md:text-sm bg-blue-600 text-white px-2 py-1 rounded-full
+                   hover:bg-blue-500 duration-200">
                     Edit
                 </a>
                 <a href="{% url 'delete_workout' workout.id %}"
@@ -58,10 +63,79 @@
                     Copy
                 </a>
             </div>
+
+            <!-- Hidden exercises row -->
+            <div id="exercises-{{ workout.id }}"
+                 class="col-span-12 row-span-1 {% if expand != workout.id %}hidden{% endif %}">
+                <div class="px-6 py-3">
+                    <h3 class="uppercase font-semibold text-xs md:text-sm pb-2">Sets</h3>
+                    <ul class="w-full text-xs md:text-sm bg-neutral-50 border-t">
+                        {% for exercise in workout.workoutexercise_set.all %}
+                            <li class="flex justify-between gap-x-2 py-2 border-b">
+                                <div class="flex items-center gap-x-2">
+                                    <b>{{ exercise.order|add:1 }}</b>
+                                    <p>{{ exercise.exercise.name }} x {{ exercise.set_set.count }}</p>
+                                    <a href="{% url 'update_workout_exercise' workout.id exercise.id %}"
+                                       class="text-blue-600 hover:text-blue-500 duration-200">
+                                        <i class="fa-solid fa-pen-to-square fa-lg"></i>
+                                    </a>
+                                    <a href="{% url 'delete_workout_exercise' exercise.id %}"
+                                       class="text-red-600 hover:text-red-500 duration-200">
+                                        <i class="fa-solid fa-circle-minus fa-lg"></i>
+                                    </a>
+                                </div>
+                                <div class="flex items-center gap-x-2">
+                                    {% if not forloop.first %}
+                                        <a href="{% url 'reorder_workout_exercise' exercise.id 1 %}"
+                                           class="text-neutral-600 hover:text-neutral-500 duration-200">
+                                            <i class="fa-solid fa-arrow-up fa-lg"></i>
+                                        </a>
+                                    {% endif %}
+                                    {% if not forloop.last %}
+                                        <a href="{% url 'reorder_workout_exercise' exercise.id 0 %}"
+                                           class="text-neutral-600 hover:text-neutral-500 duration-200">
+                                            <i class="fa-solid fa-arrow-down fa-lg"></i>
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </li>
+                        {% empty %}
+                            <li class="py-1 italic text-gray-400">No exercises listed.</li>
+                        {% endfor %}
+                    </ul>
+                    <div class="flex flex-col md:flex-row justify-end pt-2 gap-x-1 gap-y-1">
+                    <a href="{% url 'add_exercise_to_workout' workout.id %}"
+                       class="text-xs md:text-sm bg-green-600 text-white px-2 py-1 rounded-full
+                       hover:bg-green-500 duration-200">
+                        Add Exercise
+                    </a>
+                    </div>
+                </div>
+            </div>
         {% empty %}
             <div class="col-span-11 row-span-1 flex justify-center items-center py-3">
                 No workouts to show.
             </div>
         {% endfor %}
     </div>
+
+    <script>
+        function toggleExercises(workoutId) {
+            const exercises_dropdown = document.getElementById(`exercises-${workoutId}`);
+            if (exercises_dropdown.classList.contains('hidden')) {
+                exercises_dropdown.classList.remove('hidden');
+            } else {
+                exercises_dropdown.classList.add('hidden');
+            }
+
+            const exercises_dropdown_button = document.getElementById(`exercises-${workoutId}-button-icon`);
+            if (exercises_dropdown_button.classList.contains('fa-caret-down')) {
+                exercises_dropdown_button.classList.remove('fa-caret-down');
+                exercises_dropdown_button.classList.add('fa-caret-up');
+            } else {
+                exercises_dropdown_button.classList.remove('fa-caret-up');
+                exercises_dropdown_button.classList.add('fa-caret-down');
+            }
+        }
+    </script>
 {% endblock activities_table %}

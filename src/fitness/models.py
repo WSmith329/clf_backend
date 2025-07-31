@@ -2,7 +2,7 @@ from pathlib import Path
 
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Value
 from django.db.models.functions import Concat
 from django.utils.translation import gettext_lazy as _
@@ -114,6 +114,51 @@ class WorkoutExercise(models.Model):
     workout = models.ForeignKey('Workout', on_delete=models.CASCADE)
 
     order = models.PositiveIntegerField(default=0)
+
+    def reorder(self, direction):
+        """Change the order of a workout exercise.
+
+        pk: primary key of target workout exercise.
+        direction: 0 to move down the order, 1 to move up the order.
+        """
+        match direction:
+            case 0:
+                if next_exercise := self.__class__.objects.filter(
+                        workout=self.workout, order__exact=self.order + 1
+                ):
+                    with transaction.atomic():
+                        next_exercise.first().order -= 1
+                        next_exercise.first().save()
+
+                        self.order += 1
+                        self.save()
+            case 1:
+                if self.order == 0:
+                    pass
+                if previous_exercise := self.__class__.objects.filter(
+                        workout=self.workout, order__exact=self.order - 1
+                ):
+                    with transaction.atomic():
+                        previous_exercise.first().order += 1
+                        previous_exercise.first().save()
+
+                        self.order -= 1
+                        self.save()
+
+    def save(self, *args, **kwargs):
+        if not self.id:
+            self.order = self.__class__.objects.last().order + 1
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        if following_exercises := self.__class__.objects.filter(
+            workout=self.workout, order__gt=self.order
+        ):
+            with transaction.atomic():
+                for exercise in following_exercises:
+                    exercise.order -= 1
+                    exercise.save()
+        super().delete(*args, **kwargs)
 
     def __str__(self):
         return f'{self.workout.name} ({self.exercise.name})'
