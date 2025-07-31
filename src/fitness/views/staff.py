@@ -96,6 +96,9 @@ def add_exercise_to_workout(request, workout_pk, workout_exercise_pk=None):
             for set in sets:
                 set.workout_exercise = workout_exercise
                 set.save()
+            for form in set_formset.deleted_forms:
+                if form.instance.pk:
+                    form.instance.delete()
 
             if 'submit_and_add_another' in request.POST:
                 return redirect('add_exercise_to_workout', workout_id=workout.id)

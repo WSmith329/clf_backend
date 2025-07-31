@@ -48,7 +48,7 @@ SetFormSet = inlineformset_factory(
     Set,
     fields=['reps', 'until_failure', 'weight_level'],
     extra=1,
-    can_delete=False
+    can_delete=True
 )
 
 

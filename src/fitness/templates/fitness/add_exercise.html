@@ -54,31 +54,42 @@
                                 <hr>
                                 <h3 class="form-label text-right">Set #{{ forloop.counter }}</h3>
                                 {% for field in form %}
-                                    <div>
-                                        {% if field.widget_type != "hidden" %}
-                                        <label for="{{ field.id_for_label }}" class="form-label">
-                                            {{ field.label }}
-                                        </label>
-                                        {% endif %}
-                                        {% if field.widget_type == "checkbox" %}
-                                            <input type="checkbox" class="form-checkbox" name="{{ field.html_name }}"
+                                    {% if field.name == "DELETE" %}
+                                        <div class="flex items-center justify-end gap-x-1">
+                                            <label for="{{ field.id_for_label }}" class="form-label">
+                                                {{ field.label }}:
+                                            </label>
+                                            <input type="checkbox" name="{{ field.html_name }}"
                                                    id="{{ field.id_for_label }}"
-                                                   {% if field.initial %}checked{% endif %}>
-                                            {{ choice.choice_label }}
-                                        {% elif field.name == "weight_level" %}
-                                            <select id="{{ field.id_for_label }}" name="{{ field.html_name }}" class="form-select">
-                                                {% for value, label in field.field.choices %}
-                                                    <option value="{{ value }}" {% if field.value == value %}selected{% endif %}>
-                                                        {{ label }}
-                                                    </option>
-                                                {% endfor %}
-                                            </select>
-                                        {% else %}
-                                            <input type="{{ field.widget_type }}" placeholder="{{ field.label }}"
-                                                   id="{{ field.id_for_label }}" name="{{ field.html_name }}" class="form-input"
-                                                   {% if field.value %}value="{{ field.value }}"{% endif %}>
-                                        {% endif %}
-                                    </div>
+                                                   class="form-checkbox text-red-600 focus:ring-red-600">
+                                        </div>
+                                    {% else %}
+                                        <div>
+                                            {% if field.widget_type != "hidden" %}
+                                            <label for="{{ field.id_for_label }}" class="form-label">
+                                                {{ field.label }}
+                                            </label>
+                                            {% endif %}
+                                            {% if field.widget_type == "checkbox" %}
+                                                <input type="checkbox" class="form-checkbox" name="{{ field.html_name }}"
+                                                       id="{{ field.id_for_label }}"
+                                                       {% if field.initial %}checked{% endif %}>
+                                                {{ choice.choice_label }}
+                                            {% elif field.name == "weight_level" %}
+                                                <select id="{{ field.id_for_label }}" name="{{ field.html_name }}" class="form-select">
+                                                    {% for value, label in field.field.choices %}
+                                                        <option value="{{ value }}" {% if field.value == value %}selected{% endif %}>
+                                                            {{ label }}
+                                                        </option>
+                                                    {% endfor %}
+                                                </select>
+                                            {% else %}
+                                                <input type="{{ field.widget_type }}" placeholder="{{ field.label }}"
+                                                       id="{{ field.id_for_label }}" name="{{ field.html_name }}" class="form-input"
+                                                       {% if field.value %}value="{{ field.value }}"{% endif %}>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
                                 {% endfor %}
                         {% endfor %}
                     </div>
