@@ -59,14 +59,14 @@ def create_workout(request, pk=None):
         workout_form = WorkoutForm(request.POST, instance=workout)
 
         if workout_form.is_valid():
-            workout_form.save()
+            workout = workout_form.save()
             messages.success(
                 request,
                 f'Created {workout_form.instance.name}' if is_new else f'Updated {workout_form.instance.name}'
             )
 
             if 'submit_and_add_another' in request.POST:
-                return redirect('add_exercise_to_workout', workout_id=workout.id)
+                return redirect('add_exercise_to_workout', workout_pk=workout.pk)
             elif 'submit_and_exit' in request.POST:
                 return redirect('manage_workouts')
 
@@ -101,7 +101,7 @@ def add_exercise_to_workout(request, workout_pk, workout_exercise_pk=None):
                     form.instance.delete()
 
             if 'submit_and_add_another' in request.POST:
-                return redirect('add_exercise_to_workout', workout_id=workout.id)
+                return redirect('add_exercise_to_workout', workout_pk=workout.pk)
             elif 'submit_and_exit' in request.POST:
                 manage_workouts_url = reverse('manage_workouts')
                 return redirect(f'{manage_workouts_url}?expand={workout.pk}')

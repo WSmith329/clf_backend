@@ -25,13 +25,14 @@
                 {% for field in exercise_form %}
                     <div>
                         <label for="{{ field.id_for_label }}" class="form-label">
-                            {% if field.name == "order" %}Order in Workout{% else %}{{ field.label }}{% endif %}
+                            {{ field.label }}
                         </label>
                         <div class="form-field">
                             {% if field.name == 'exercise' %}
                                 <select id="{{ field.id_for_label }}" name="{{ field.html_name }}" class="form-select">
                                     {% for value, label in field.field.choices %}
-                                        <option value="{{ value }}" {% if field.value == value %}selected{% endif %}>
+                                        <option value="{{ value }}"
+                                                {% if field.value == value %}selected{% endif %}>
                                             {{ label }}
                                         </option>
                                     {% endfor %}
@@ -66,15 +67,14 @@
                                     {% else %}
                                         <div>
                                             {% if field.widget_type != "hidden" %}
-                                            <label for="{{ field.id_for_label }}" class="form-label">
-                                                {{ field.label }}
-                                            </label>
+                                                <label for="{{ field.id_for_label }}" class="form-label">
+                                                    {{ field.label }}
+                                                </label>
                                             {% endif %}
                                             {% if field.widget_type == "checkbox" %}
                                                 <input type="checkbox" class="form-checkbox" name="{{ field.html_name }}"
                                                        id="{{ field.id_for_label }}"
                                                        {% if field.initial %}checked{% endif %}>
-                                                {{ choice.choice_label }}
                                             {% elif field.name == "weight_level" %}
                                                 <select id="{{ field.id_for_label }}" name="{{ field.html_name }}" class="form-select">
                                                     {% for value, label in field.field.choices %}
@@ -83,14 +83,21 @@
                                                         </option>
                                                     {% endfor %}
                                                 </select>
-                                            {% else %}
+                                            {% elif field.name == "reps" %}
                                                 <input type="{{ field.widget_type }}" placeholder="{{ field.label }}"
                                                        id="{{ field.id_for_label }}" name="{{ field.html_name }}" class="form-input"
                                                        {% if field.value %}value="{{ field.value }}"{% endif %}>
+                                            {% elif field.widget_type == "hidden" %}
+                                                {{ field }}
                                             {% endif %}
+                                            <div class="form-error">{{ field.errors }}</div>
                                         </div>
                                     {% endif %}
+                                    {% for error in form.non_field_errors %}
+                                        {{ error|escape }}
+                                    {% endfor %}
                                 {% endfor %}
+                            </div>
                         {% endfor %}
                     </div>
                     <div class="formset-button-container">
@@ -100,7 +107,7 @@
                 </div>
             </div>
 
-            {% for error in workout_plan_form.non_field_errors %}
+            {% for error in exercise_form.non_field_errors %}
                 {{ error|escape }}
             {% endfor %}
 
@@ -144,10 +151,12 @@
                     if (input.id) {
                         input.id = input.id.replace(formRegex, `${formsetPrefix}-${formNum}-`);
                     }
-                    if (input.type === 'checkbox') {
+                    if (input.tagName === 'SELECT') {
+                        input.selectedIndex = 0; // reset to first option
+                    } else if (input.type === 'checkbox') {
                         input.checked = false;
                     } else {
-                        input.value = ''; // Clear input values
+                        input.value = '';
                     }
                 });
 

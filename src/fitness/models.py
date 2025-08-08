@@ -146,8 +146,8 @@ class WorkoutExercise(models.Model):
                         self.save()
 
     def save(self, *args, **kwargs):
-        if not self.id:
-            self.order = self.__class__.objects.last().order + 1
+        if not self.id and (last_exercise := self.workout.workoutexercise_set.last()):
+            self.order = last_exercise.order + 1
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
