@@ -7,8 +7,8 @@ from django.db.models.functions import Trunc
 from django.shortcuts import render, get_object_or_404, redirect
 
 from client_management.models import Client
-from fitness.controllers.session import SessionInputProcessor
-from fitness.models import WorkoutPlan, WorkoutSession, Workout, WorkoutAssignment
+from fitness.controllers.session import SessionInputProcessor, SessionHistoryManager
+from fitness.models import WorkoutPlan, WorkoutSession, Workout, WorkoutAssignment, SessionExercise
 
 
 def index(request):
@@ -44,6 +44,8 @@ def recorded_workouts(request):
 def workout(request, workout_slug):
     requested_workout = get_object_or_404(Workout, slug=workout_slug)
 
+    exercise_histories = SessionHistoryManager.get_session_exercises_grouped_by_exercise(request.user.client)
+
     if request.method == 'POST':
         SessionInputProcessor(
             workout=requested_workout,
@@ -53,8 +55,11 @@ def workout(request, workout_slug):
 
         return redirect('completed_sessions')
 
-    return render(request, 'fitness/workout.html',
-                  {'title': requested_workout, 'workout': requested_workout})
+    return render(request, 'fitness/workout.html', {
+        'title': requested_workout,
+        'workout': requested_workout,
+        'exercise_histories': exercise_histories
+    })
 
 
 def completed_sessions(request):

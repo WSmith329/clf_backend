@@ -1,11 +1,14 @@
 import re
 import logging
+from collections import defaultdict
+from typing import Dict, List
 
 import sentry_sdk
 from django.core.exceptions import ValidationError
 
+from client_management.models import Client
 from feed.controllers.log import log_public_action
-from fitness.models import WorkoutSession, SessionExercise
+from fitness.models import WorkoutSession, SessionExercise, Exercise
 
 logger = logging.getLogger(__name__)
 
@@ -71,3 +74,18 @@ class SessionInputProcessor:
             logger.exception(f'Session processing for {self.workout} failed: {e}')
             sentry_sdk.capture_exception(e)
             raise e
+
+
+class SessionHistoryManager:
+
+    @staticmethod
+    def get_session_exercises_grouped_by_exercise(client: Client) -> Dict[int, List[SessionExercise]]:
+        session_exercises = SessionExercise.objects.filter(
+            session__completed_by=client
+        ).select_related('workout_exercise__exercise')
+
+        grouped = defaultdict(list)
+        for se in session_exercises:
+            grouped[se.workout_exercise.exercise.pk].append(se)
+
+        return grouped

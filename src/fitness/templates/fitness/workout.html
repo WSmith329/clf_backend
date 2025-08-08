@@ -1,5 +1,7 @@
 {% extends "body.html" %}
 
+{% load dict_extras %}
+
 {% block content %}
     <form method="post" action="{% url 'workout' workout.slug %}"
           class="flex flex-col items-center justify-center my-10 gap-y-10">
@@ -112,6 +114,11 @@
                                     {% endfor %}
                                 </div>
                             {% endif %}
+                            <div class="w-full text-right">
+                                <button class="open-history-{{ workout_exercise.exercise.id }}" type="button">
+                                    <span class="text-xs text-primary underline">See exercise history</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 {% empty %}
@@ -124,4 +131,64 @@
             hover:brightness-95 focus:ring focus:ring-neutral-500 focus:ring-opacity-25">Cancel</a>
         </div>
     </form>
+
+    {% for exercise in workout.exercises.distinct %}
+        <div id="history-{{ exercise.id }}"
+             class="hidden fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50 font-sans">
+            <div class="bg-white p-6 rounded-lg w-96 h-96 relative flex flex-col">
+                <div>
+                    <button
+                        id="close-history-{{ exercise.id }}"
+                        class="text-gray-500 hover:text-gray-800 duration-200 float-right">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                    <h2 class="font-bold text-2xl">{{ exercise.name }}</h2>
+                    <h3 class="font-bold text-neutral-500 dark:text-neutral-300">Your History</h3>
+                </div>
+                <div class="mt-4 pr-2 flex-1 overflow-y-auto">
+                    {% if exercise.id in exercise_histories %}
+                        {% for session_exercise in exercise_histories|keyvalue:exercise.id %}
+                            <div>
+                                {% include "fitness/partials/session_exercise_sets.html" with session_exercise=session_exercise %}
+                                {% if not forloop.last %}
+                                    <hr class="my-4" />
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        You have no recorded history for this exercise.
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Get elements
+            const openBtns = document.getElementsByClassName("open-history-{{ exercise.id }}");
+            const modal = document.getElementById("history-{{ exercise.id }}");
+            const closeBtn = document.getElementById("close-history-{{ exercise.id }}");
+
+            // Open modal
+            Array.from(openBtns).forEach(btn => {
+                btn.addEventListener("click", () => {
+                    modal.classList.remove("hidden");
+                    modal.classList.add("flex");
+                });
+            });
+
+            // Close modal
+            closeBtn.onclick = function() {
+                modal.classList.add("hidden");
+                modal.classList.remove("flex");
+            }
+
+            // Close modal when clicking outside
+            window.onclick = function(event) {
+                if (event.target === modal) {
+                    modal.classList.add("hidden");
+                    modal.classList.remove("flex");
+                }
+            }
+        </script>
+    {% endfor %}
 {% endblock content %}
