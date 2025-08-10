@@ -298,7 +298,7 @@ class SessionExercise(models.Model):
                     "type": "integer"
                 },
                 "weight": {
-                    "type": "integer"
+                    "type": "number"
                 }
             }
         }

@@ -46,7 +46,7 @@ class SessionInputProcessor:
                 if field == 'reps':
                     current_set['completed'] = int(value)
                 else:
-                    current_set[field] = int(value)
+                    current_set[field] = float(value)
                 current_set['aim'] = aim
         return set_recordings
 
