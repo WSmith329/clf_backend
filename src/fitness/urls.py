@@ -48,6 +48,11 @@ urlpatterns = [
         staff_member_required(staff.reorder_workout_exercise),
         name='reorder_workout_exercise'
     ),
+    path(
+        'delete-workout-assignment/<int:pk>/',
+        staff_member_required(staff.delete_workout_assignment),
+        name='delete_workout_assignment'
+    ),
 
     path('manage-workout-plans/', staff_member_required(staff.manage_workout_plans), name='manage_workout_plans'),
     path('create-workout-plan/', staff_member_required(staff.create_workout_plan), name='create_workout_plan'),

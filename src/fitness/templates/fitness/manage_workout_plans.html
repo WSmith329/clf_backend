@@ -17,29 +17,34 @@
         </div>
     </form>
     <div class="grid grid-cols-12">
-        <div class="col-span-3 row-span-1 uppercase font-semibold text-xs md:text-sm text-center flex justify-center pb-2">
+        <div class="col-span-1 row-span-1 pb-2"></div>
+        <div class="col-span-4 row-span-1 uppercase font-semibold text-xs md:text-sm text-center flex justify-center pb-2">
             Client
         </div>
-        <div class="col-span-6 row-span-1 uppercase font-semibold text-xs md:text-sm text-center flex justify-center pb-2">
+        <div class="col-span-2 row-span-1 uppercase font-semibold text-xs md:text-sm text-center flex justify-center pb-2">
             Workouts
         </div>
-        <div class="col-span-3 row-span-1 uppercase font-semibold text-xs md:text-sm text-center flex justify-center pb-2">
+        <div class="col-span-5 row-span-1 uppercase font-semibold text-xs md:text-sm text-center flex justify-center pb-2">
             Actions
         </div>
         {% for plan in workout_plans %}
-            <div class="col-span-3 row-span-1 flex justify-center items-center py-3 text-xs md:text-base
+            <div class="col-span-1 row-span-1  flex justify-center items-center py-3 text-xs md:text-base
+            text-center {% cycle 'bg-neutral-100' 'bg-white' %}">
+                <button onclick="toggleWorkouts('{{ plan.id }}')"
+                        class="text-neutral-600 hover:text-neutral-500 duration-200">
+                    <i id="workouts-{{ plan.id }}-button-icon"
+                       class="fa-solid fa-caret-{% if expand == plan.id %}up{% else %}down{% endif %} fa-lg"></i>
+                </button>
+            </div>
+            <div class="col-span-4 row-span-1 flex justify-center items-center py-3 text-xs md:text-base
             text-center {% cycle 'bg-neutral-100' 'bg-white' %}">
                 {{ plan.client.user.first_name }} {{ plan.client.user.last_name }}
             </div>
-            <div class="col-span-6 row-span-1 flex justify-center items-center py-3 text-xs md:text-base
+            <div class="col-span-2 row-span-1 flex justify-center items-center py-3 text-xs md:text-base
             text-center {% cycle 'bg-neutral-100' 'bg-white' %}">
-                {% for workout in plan.workouts.all %}
-                    <a href="{% url 'update_workout' workout.id %}" class="hover:text-neutral-600 duration-200">
-                        {{ workout.name }}{% if not forloop.last %},&nbsp;{% endif %}
-                    </a>
-                {% endfor %}
+                {{ plan.workoutassignment_set.count }}
             </div>
-            <div class="col-span-3 row-span-1 flex flex-col md:flex-row justify-center items-center py-6
+            <div class="col-span-5 row-span-1 flex flex-col md:flex-row justify-center items-center py-6
             text-center gap-x-1 gap-y-1 {% cycle 'bg-neutral-100' 'bg-white' %}">
                 <a href="{% url 'update_workout_plan' plan.id %}"
                    class="text-xs md:text-sm bg-blue-600 text-white px-2 py-1 rounded-full
@@ -57,10 +62,70 @@
                     Copy
                 </a>
             </div>
+
+            <!-- Hidden workouts row -->
+            <div id="workouts-{{ plan.id }}"
+                 class="col-span-12 row-span-1 {% if expand != plan.id %}hidden{% endif %}">
+                <div class="px-6 py-3">
+                    <h3 class="uppercase font-semibold text-xs md:text-sm pb-2">Workouts</h3>
+                    <ul class="w-full text-xs md:text-sm bg-neutral-50 border-t">
+                        {% for assignment in plan.workoutassignment_set.all %}
+                            <li class="flex justify-between gap-x-2 py-2 border-b">
+                                <div class="flex items-center">
+                                    <a href="{% url 'manage_workouts' %}?expand={{ assignment.workout.id }}"
+                                        class="text-primary hover:brightness-90 duration-200 underline">
+                                        {{ assignment.workout.name }}
+                                    </a>
+                                </div>
+                                <div class="grid grid-cols-7 grid-rows-2 justify-items-center gap-2">
+                                    {% for day in weekdays %}
+                                        <div class="col-span-1 row-span-1 row-start-1">{{ day|slice:":2" }}</div>
+                                        <div class="col-span-1 row-span-1 row-start-2">
+                                            {% if forloop.counter0 in assignment.weekday %}
+                                                <i class="fa-solid fa-square-check text-green-600"></i>
+                                            {% else %}
+                                                <i class="fa-solid fa-square text-neutral-600"></i>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="flex items-center gap-x-2">
+                                    <a href="{% url 'delete_workout_assignment' assignment.id %}"
+                                       class="text-red-600 hover:text-red-500 duration-200">
+                                        <i class="fa-solid fa-circle-minus fa-lg"></i>
+                                    </a>
+                                </div>
+                            </li>
+                        {% empty %}
+                            <li class="py-1 italic text-gray-400">No workouts listed.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
         {% empty %}
             <div class="col-span-11 row-span-1 flex justify-center items-center py-3">
                 No workout plans to show.
             </div>
         {% endfor %}
     </div>
+
+    <script>
+        function toggleWorkouts(planId) {
+            const workouts_dropdown = document.getElementById(`workouts-${planId}`);
+            if (workouts_dropdown.classList.contains('hidden')) {
+                workouts_dropdown.classList.remove('hidden');
+            } else {
+                workouts_dropdown.classList.add('hidden');
+            }
+
+            const workouts_dropdown_button = document.getElementById(`workouts-${planId}-button-icon`);
+            if (workouts_dropdown_button.classList.contains('fa-caret-down')) {
+                workouts_dropdown_button.classList.remove('fa-caret-down');
+                workouts_dropdown_button.classList.add('fa-caret-up');
+            } else {
+                workouts_dropdown_button.classList.remove('fa-caret-up');
+                workouts_dropdown_button.classList.add('fa-caret-down');
+            }
+        }
+    </script>
 {% endblock activities_table %}

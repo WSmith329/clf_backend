@@ -5,7 +5,7 @@ from django.urls import reverse
 
 from fitness.forms import ExerciseForm, WorkoutForm, WorkoutPlanForm, WorkoutAssignmentFormSet, WorkoutExerciseForm, \
     SetFormSet
-from fitness.models import Exercise, Workout, WorkoutPlan, WorkoutExercise
+from fitness.models import Exercise, Workout, WorkoutPlan, WorkoutExercise, WorkoutAssignment, Weekday
 
 
 def create_exercise(request, pk=None):
@@ -188,6 +188,9 @@ def _manage_activities(request, model, template_name, search_field_name, context
 
 
 def manage_workout_plans(request):
+    if expand := request.GET.get('expand'):
+        expand = int(expand)
+
     return _manage_activities(
         request,
         model=WorkoutPlan,
@@ -196,7 +199,9 @@ def manage_workout_plans(request):
         context_key='workout_plans',
         title='Manage workout plans',
         activity='workout_plans',
-        custom_query_fn=WorkoutPlan.objects.get_by_client_name
+        custom_query_fn=WorkoutPlan.objects.get_by_client_name,
+        expand=expand,
+        weekdays=Weekday.labels
     )
 
 
@@ -283,3 +288,16 @@ def reorder_workout_exercise(request, pk, direction):
     workout_exercise.reorder(direction)
     manage_workouts_url = reverse('manage_workouts')
     return redirect(f'{manage_workouts_url}?expand={workout_exercise.workout.pk}')
+
+
+def delete_workout_assignment(request, pk):
+    manage_workouts_url = reverse('manage_workout_plans')
+    plan_pk = get_object_or_404(WorkoutAssignment, pk=pk).workout_plan.pk
+
+    return _delete_activity(
+        request,
+        model=WorkoutAssignment,
+        pk=pk,
+        success_message='Workout successfully removed from plan.',
+        redirect_url=f'{manage_workouts_url}?expand={plan_pk}'
+    )
